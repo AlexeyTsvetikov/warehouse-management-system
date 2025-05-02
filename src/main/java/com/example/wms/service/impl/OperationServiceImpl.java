@@ -7,6 +7,7 @@ import com.example.wms.model.dto.request.OperationInfoReq;
 import com.example.wms.model.dto.response.OperationDetailInfoResp;
 import com.example.wms.model.dto.response.OperationInfoResp;
 import com.example.wms.model.enums.OperationStatus;
+import com.example.wms.service.OperationDetailService;
 import com.example.wms.service.OperationService;
 import com.example.wms.service.StockService;
 import com.example.wms.utils.PaginationUtils;
@@ -34,25 +35,25 @@ public class OperationServiceImpl implements OperationService {
     private final DocumentRepository documentRepository;
     private final ObjectMapper objectMapper;
     private final StockService stockService;
+    private final OperationDetailService operationDetailService;
     private final OperationDetailRepository operationDetailRepository;
 
     @Override
     @Transactional
     public OperationInfoResp createOperation(OperationInfoReq req) {
-        User user = userRepository.findById(req.getUserId())
+        User user = userRepository.findByIdAndIsActiveTrue(req.getUserId())
                 .orElseThrow(() -> new CommonBackendException("User not found", HttpStatus.NOT_FOUND));
 
-        Document document = documentRepository.findById(req.getDocumentId())
+        Document document = documentRepository.findByIdAndIsActiveTrue(req.getDocumentId())
                 .orElseThrow(() -> new CommonBackendException("Document not found", HttpStatus.NOT_FOUND));
 
-        Operation operation = new Operation();
-        operation.setOperationType(req.getOperationType());
+        Operation operation = objectMapper.convertValue(req, Operation.class);
         operation.setUser(user);
         operation.setDocument(document);
         operation.setOperationStatus(OperationStatus.CREATED);
         Operation savedOperation = operationRepository.save(operation);
 
-        return objectMapper.convertValue(savedOperation, OperationInfoResp.class);
+        return getOperationInfoResp(savedOperation, operation.getOperationDetails());
 
     }
 
@@ -87,6 +88,10 @@ public class OperationServiceImpl implements OperationService {
 
         List<OperationDetail> details = operation.getOperationDetails();
 
+        if (details == null || details.isEmpty()) {
+            throw new CommonBackendException("Нет деталей для операции. Статус операции обновлен на CREATED.", HttpStatus.BAD_REQUEST);
+        }
+
         try {
             for (OperationDetail detail : details) {
                 Product product = detail.getProduct();
@@ -99,8 +104,7 @@ public class OperationServiceImpl implements OperationService {
         } catch (CommonBackendException e) {
             throw new CommonBackendException("Error during receiving for operation ID: " + id + ": " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        return objectMapper.convertValue(operation, OperationInfoResp.class);
+        return getOperationInfoResp(operation, details);
     }
 
     @Override
@@ -118,6 +122,10 @@ public class OperationServiceImpl implements OperationService {
 
         List<OperationDetail> details = operation.getOperationDetails();
 
+        if (details == null || details.isEmpty()) {
+            throw new CommonBackendException("Нет деталей для операции. Статус операции обновлен на CREATED.", HttpStatus.BAD_REQUEST);
+        }
+
         try {
             for (OperationDetail detail : details) {
                 Product product = detail.getProduct();
@@ -130,8 +138,7 @@ public class OperationServiceImpl implements OperationService {
         } catch (CommonBackendException e) {
             throw new CommonBackendException("Error during shipping for operation ID: " + id + ": " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        return objectMapper.convertValue(operation, OperationInfoResp.class);
+        return getOperationInfoResp(operation, details);
     }
 
     @Override
@@ -150,6 +157,10 @@ public class OperationServiceImpl implements OperationService {
 
         List<OperationDetail> details = operation.getOperationDetails();
 
+        if (details == null || details.isEmpty()) {
+            throw new CommonBackendException("Нет деталей для операции. Статус операции обновлен на CREATED.", HttpStatus.BAD_REQUEST);
+        }
+
         try {
             for (OperationDetail detail : details) {
                 Product product = detail.getProduct();
@@ -164,7 +175,8 @@ public class OperationServiceImpl implements OperationService {
         } catch (CommonBackendException e) {
             throw new CommonBackendException("Error during stock transfer for operation ID: " + id + ": " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return objectMapper.convertValue(operation, OperationInfoResp.class);
+
+        return getOperationInfoResp(operation, details);
     }
 
     @Override
@@ -175,12 +187,7 @@ public class OperationServiceImpl implements OperationService {
         Operation operation = operationRepository.findById(id)
                 .orElseThrow(() -> new CommonBackendException(errMsg, HttpStatus.NOT_FOUND));
 
-        OperationInfoResp response = objectMapper.convertValue(operation, OperationInfoResp.class);
-        response.setOperationDetails(operation.getOperationDetails().stream()
-                .map(detail -> objectMapper.convertValue(detail, OperationDetailInfoResp.class))
-                .collect(Collectors.toList()));
-
-        return response;
+        return getOperationInfoResp(operation, operation.getOperationDetails());
     }
 
     @Override
@@ -190,8 +197,7 @@ public class OperationServiceImpl implements OperationService {
         Page<OperationDetail> operationDetails = operationDetailRepository.findByOperationId(operationId, pageRequest);
 
         List<OperationDetailInfoResp> content = operationDetails.getContent().stream()
-                .map(detail -> objectMapper.convertValue(detail, OperationDetailInfoResp.class))
-                .collect(Collectors.toList());
+                .map(operationDetailService::getOperationDetailInfoResp).collect(Collectors.toList());
 
         return new PageImpl<>(content, pageRequest, operationDetails.getTotalElements());
     }
@@ -215,6 +221,18 @@ public class OperationServiceImpl implements OperationService {
 
         operation.setOperationStatus(OperationStatus.CANCELLED);
         operationRepository.save(operation);
+    }
+
+    private OperationInfoResp getOperationInfoResp(Operation operation, List<OperationDetail> details) {
+        List<OperationDetailInfoResp> detailsResp = details.stream()
+                .map(operationDetailService::getOperationDetailInfoResp)
+                .collect(Collectors.toList());
+
+        OperationInfoResp resp = objectMapper.convertValue(operation, OperationInfoResp.class);
+        resp.setDocumentNumber(operation.getDocument().getNumber());
+        resp.setUsername(operation.getUser().getUsername());
+        resp.setOperationDetails(detailsResp);
+        return resp;
     }
 
 }

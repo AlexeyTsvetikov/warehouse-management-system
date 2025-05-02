@@ -28,7 +28,7 @@ public class ProductController {
     @GetMapping("/all")
     public Page<ProductInfoResp> getAllProducts(@RequestParam(defaultValue = "1") Integer page,
                                                     @RequestParam(defaultValue = "10") Integer perPage,
-                                                    @RequestParam(defaultValue = "brand") String sort,
+                                                    @RequestParam(defaultValue = "sku") String sort,
                                                     @RequestParam(defaultValue = "ASC") Sort.Direction order) {
         return productService.getAllProducts(page, perPage, sort, order);
     }

@@ -27,7 +27,7 @@ public class RoleController {
     @GetMapping("/all")
     public Page<RoleInfoResp> getAllRoles(@RequestParam(defaultValue = "1") Integer page,
                                           @RequestParam(defaultValue = "10") Integer perPage,
-                                          @RequestParam(defaultValue = "brand") String sort,
+                                          @RequestParam(defaultValue = "name") String sort,
                                           @RequestParam(defaultValue = "ASC") Sort.Direction order) {
         return roleService.getAllRoles(page, perPage, sort, order);
     }

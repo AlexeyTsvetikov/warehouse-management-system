@@ -13,6 +13,8 @@ public interface ManufacturerRepository extends JpaRepository<Manufacturer, Long
 
     Optional<Manufacturer> findByName(String name);
 
+    Optional<Manufacturer> findByNameAndIsActiveTrue(String name);
+
     Optional<Manufacturer> findByIdAndIsActiveTrue(Long id);
 
     Page<Manufacturer> findAllByIsActiveTrue(Pageable pageRequest);

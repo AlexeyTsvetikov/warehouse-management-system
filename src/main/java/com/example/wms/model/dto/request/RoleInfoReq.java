@@ -14,6 +14,6 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RoleInfoReq {
-    private String roleName;
+    private String name;
     private String description;
 }

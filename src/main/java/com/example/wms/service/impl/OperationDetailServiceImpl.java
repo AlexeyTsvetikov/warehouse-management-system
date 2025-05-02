@@ -35,13 +35,13 @@ public class OperationDetailServiceImpl implements OperationDetailService {
     @Override
     @Transactional
     public OperationDetailInfoResp createOperationDetail(OperationDetailInfoReq req) {
-        Product product = productRepository.findById(req.getProductId())
+        Product product = productRepository.findBySkuAndIsActiveTrue(req.getSku())
                 .orElseThrow(() -> new CommonBackendException("Product not found", HttpStatus.NOT_FOUND));
 
-        Location fromLocation = locationRepository.findById(req.getFromLocationId())
+        Location fromLocation = locationRepository.findByNameAndIsActiveTrue(req.getFromLocationName())
                 .orElseThrow(() -> new CommonBackendException("Departure location not found", HttpStatus.NOT_FOUND));
 
-        Location toLocation = locationRepository.findById(req.getToLocationId())
+        Location toLocation = locationRepository.findByNameAndIsActiveTrue(req.getToLocationName())
                 .orElseThrow(() -> new CommonBackendException("Destination location not found", HttpStatus.NOT_FOUND));
 
         Operation operation = operationRepository.findById(req.getOperationId())
@@ -51,16 +51,15 @@ public class OperationDetailServiceImpl implements OperationDetailService {
             throw new CommonBackendException("Cannot add details to an operation that is not in 'CREATED' status", HttpStatus.FORBIDDEN);
         }
 
-        OperationDetail operationDetail = new OperationDetail();
+        OperationDetail operationDetail = objectMapper.convertValue(req, OperationDetail.class);
         operationDetail.setProduct(product);
-        operationDetail.setQuantity(req.getQuantity());
         operationDetail.setFromLocation(fromLocation);
         operationDetail.setToLocation(toLocation);
         operationDetail.setOperation(operation);
 
         OperationDetail savedOperationDetail = operationDetailRepository.save(operationDetail);
 
-        return objectMapper.convertValue(savedOperationDetail, OperationDetailInfoResp.class);
+        return getOperationDetailInfoResp(savedOperationDetail);
     }
 
     @Override
@@ -71,8 +70,7 @@ public class OperationDetailServiceImpl implements OperationDetailService {
         Page<OperationDetail> operationDetails = operationDetailRepository.findAll(pageRequest);
 
         List<OperationDetailInfoResp> content = operationDetails.getContent().stream()
-                .map(operationDetail -> objectMapper.convertValue(operationDetail, OperationDetailInfoResp.class))
-                .collect(Collectors.toList());
+                .map(this::getOperationDetailInfoResp).collect(Collectors.toList());
 
         return new PageImpl<>(content, pageRequest, operationDetails.getTotalElements());
     }
@@ -83,8 +81,10 @@ public class OperationDetailServiceImpl implements OperationDetailService {
     public OperationDetailInfoResp getDetail(Long detailId) {
         OperationDetail detail = operationDetailRepository.findById(detailId)
                 .orElseThrow(() -> new CommonBackendException("Operation detail not found", HttpStatus.NOT_FOUND));
-        return objectMapper.convertValue(detail, OperationDetailInfoResp.class);
+
+        return getOperationDetailInfoResp(detail);
     }
+
 
     @Override
     @Transactional
@@ -100,8 +100,8 @@ public class OperationDetailServiceImpl implements OperationDetailService {
                     HttpStatus.FORBIDDEN);
         }
 
-        if (req.getProductId() != null) {
-            Product product = productRepository.findById(req.getProductId())
+        if (req.getSku() != null) {
+            Product product = productRepository.findBySkuAndIsActiveTrue(req.getSku())
                     .orElseThrow(() -> new CommonBackendException("Product not found", HttpStatus.NOT_FOUND));
             operationDetail.setProduct(product);
         }
@@ -110,21 +110,20 @@ public class OperationDetailServiceImpl implements OperationDetailService {
             operationDetail.setQuantity(req.getQuantity());
         }
 
-        if (req.getFromLocationId() != null) {
-            Location fromLocation = locationRepository.findById(req.getFromLocationId())
+        if (req.getFromLocationName() != null) {
+            Location fromLocation = locationRepository.findByNameAndIsActiveTrue(req.getFromLocationName())
                     .orElseThrow(() -> new CommonBackendException("Departure location not found", HttpStatus.NOT_FOUND));
             operationDetail.setFromLocation(fromLocation);
         }
 
-        if (req.getToLocationId() != null) {
-            Location toLocation = locationRepository.findById(req.getToLocationId())
+        if (req.getToLocationName() != null) {
+            Location toLocation = locationRepository.findByNameAndIsActiveTrue(req.getToLocationName())
                     .orElseThrow(() -> new CommonBackendException("Destination location not found", HttpStatus.NOT_FOUND));
             operationDetail.setToLocation(toLocation);
         }
 
         OperationDetail updatedOperationDetail = operationDetailRepository.save(operationDetail);
-
-        return objectMapper.convertValue(updatedOperationDetail, OperationDetailInfoResp.class);
+        return getOperationDetailInfoResp(updatedOperationDetail);
     }
 
     @Override
@@ -140,5 +139,16 @@ public class OperationDetailServiceImpl implements OperationDetailService {
 
         operationDetailRepository.delete(detail);
     }
+
+    @Override
+    public OperationDetailInfoResp getOperationDetailInfoResp(OperationDetail detail) {
+        OperationDetailInfoResp resp = objectMapper.convertValue(detail, OperationDetailInfoResp.class);
+        resp.setOperationId(detail.getOperation().getId());
+        resp.setFromLocationName(detail.getFromLocation().getName());
+        resp.setToLocationName(detail.getToLocation().getName());
+        resp.setSku(detail.getProduct().getSku());
+        return resp;
+    }
+
 }
 

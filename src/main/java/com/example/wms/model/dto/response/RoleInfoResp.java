@@ -15,6 +15,6 @@ import lombok.experimental.SuperBuilder;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RoleInfoResp {
     private Long id;
-    private String roleName;
+    private String name;
     private String description;
 }

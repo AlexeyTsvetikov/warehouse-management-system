@@ -1,5 +1,6 @@
 package com.example.wms.service;
 
+import com.example.wms.model.db.entity.OperationDetail;
 import com.example.wms.model.dto.request.OperationDetailInfoReq;
 import com.example.wms.model.dto.response.OperationDetailInfoResp;
 import org.springframework.data.domain.Page;
@@ -22,4 +23,6 @@ public interface OperationDetailService {
     OperationDetailInfoResp updateOperationDetail(Long id, OperationDetailInfoReq req);
 
     Page<OperationDetailInfoResp> getAllOperationDetails(Integer page, Integer perPage, String sort, Sort.Direction order);
+
+    OperationDetailInfoResp getOperationDetailInfoResp(OperationDetail detail);
 }

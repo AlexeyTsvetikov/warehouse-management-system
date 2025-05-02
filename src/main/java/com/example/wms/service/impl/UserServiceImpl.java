@@ -39,25 +39,21 @@ public class UserServiceImpl implements UserService {
             throw new CommonBackendException("User  with username already exists", HttpStatus.CONFLICT);
         }
 
-        User user = new User();
-        user.setUsername(req.getUsername());
-        user.setPasswordHash(req.getPasswordHash());
-        user.setFirstName(req.getFirstName());
-        user.setLastName(req.getLastName());
-        user.setMiddleName(req.getMiddleName());
-        user.setIsActive(true);
+        User user = objectMapper.convertValue(req, User.class);
 
         if (req.getRoleName() != null) {
-            Role role = roleRepository.findByRoleName(req.getRoleName())
+            Role role = roleRepository.findByNameAndIsActiveTrue(req.getRoleName())
                     .orElseThrow(() -> new CommonBackendException(
                             "Role with name: " + req.getRoleName() + " not found", HttpStatus.NOT_FOUND));
             user.setRole(role);
         } else {
             throw new CommonBackendException("Role must be provided", HttpStatus.BAD_REQUEST);
         }
-
+        user.setIsActive(true);
         User savedUser = userRepository.save(user);
-        return objectMapper.convertValue(savedUser, UserInfoResp.class);
+        UserInfoResp resp = objectMapper.convertValue(savedUser, UserInfoResp.class);
+        resp.setRoleName(savedUser.getRole().getName());
+        return resp;
     }
 
     @Override
@@ -65,10 +61,12 @@ public class UserServiceImpl implements UserService {
     public UserInfoResp getUser(Long id) {
         final String errMsg = String.format("User  with id: %s not found", id);
 
-        User user = userRepository.findById(id)
+        User user = userRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new CommonBackendException(errMsg, HttpStatus.NOT_FOUND));
 
-        return objectMapper.convertValue(user, UserInfoResp.class);
+        UserInfoResp resp = objectMapper.convertValue(user, UserInfoResp.class);
+        resp.setRoleName(user.getRole().getName());
+        return resp;
     }
 
     @Override
@@ -81,8 +79,11 @@ public class UserServiceImpl implements UserService {
         users = userRepository.findAllByIsActiveTrue(pageRequest);
 
         List<UserInfoResp> content = users.getContent().stream()
-                .map(user -> objectMapper.convertValue(user, UserInfoResp.class))
-                .collect(Collectors.toList());
+                .map(user -> {
+                    UserInfoResp resp = objectMapper.convertValue(user, UserInfoResp.class);
+                    resp.setRoleName(user.getRole().getName());
+                    return resp;
+                }).collect(Collectors.toList());
 
         return new PageImpl<>(content, pageRequest, users.getTotalElements());
     }
@@ -92,7 +93,7 @@ public class UserServiceImpl implements UserService {
     public UserInfoResp updateUser(Long id, UserInfoReq req) {
         final String errUserMsg = String.format("User  with id: %s not found", id);
 
-        User user = userRepository.findById(id)
+        User user = userRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new CommonBackendException(errUserMsg, HttpStatus.NOT_FOUND));
 
         user.setUsername(req.getUsername() != null ? req.getUsername() : user.getUsername());
@@ -103,13 +104,15 @@ public class UserServiceImpl implements UserService {
 
         if (req.getRoleName() != null) {
             final String errRoleMsg = String.format("Role with name: %s not found", req.getRoleName());
-            Role role = roleRepository.findByRoleName(req.getRoleName())
+            Role role = roleRepository.findByNameAndIsActiveTrue(req.getRoleName())
                     .orElseThrow(() -> new CommonBackendException(errRoleMsg, HttpStatus.NOT_FOUND));
             user.setRole(role);
         }
 
         User updatedUser = userRepository.save(user);
-        return objectMapper.convertValue(updatedUser, UserInfoResp.class);
+        UserInfoResp resp = objectMapper.convertValue(updatedUser, UserInfoResp.class);
+        resp.setRoleName(user.getRole().getName());
+        return resp;
     }
 
     @Override
@@ -117,7 +120,7 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(Long id) {
         final String errMsg = String.format("User  with id: %s not found", id);
 
-        User user = userRepository.findById(id)
+        User user = userRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new CommonBackendException(errMsg, HttpStatus.NOT_FOUND));
         user.setIsActive(false);
         userRepository.save(user);

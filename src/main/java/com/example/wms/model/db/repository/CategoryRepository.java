@@ -13,6 +13,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     Optional<Category> findByName(String categoryName);
 
+    Optional<Category> findByNameAndIsActiveTrue(String categoryName);
+
     Optional<Category> findByIdAndIsActiveTrue(Long id);
 
     Page<Category> findAllByIsActiveTrue(Pageable pageRequest);

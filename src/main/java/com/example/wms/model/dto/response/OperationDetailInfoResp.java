@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 public class OperationDetailInfoResp {
     private Long id;
     private Long operationId;
-    private Long productId;
+    private String sku;
     private Integer quantity;
     private String fromLocationName;
     private String toLocationName;

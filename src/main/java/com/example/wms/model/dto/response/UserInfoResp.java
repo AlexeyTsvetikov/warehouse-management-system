@@ -16,7 +16,6 @@ import lombok.experimental.SuperBuilder;
 public class UserInfoResp {
     private Long id;
     private String username;
-    private String passwordHash;
     private String firstName;
     private String lastName;
     private String middleName;

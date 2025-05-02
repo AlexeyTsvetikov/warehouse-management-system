@@ -15,8 +15,8 @@ import lombok.experimental.SuperBuilder;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OperationDetailInfoReq {
     private Long operationId;
-    private Long productId;
+    private String sku;
     private Integer quantity;
-    private Long fromLocationId;
-    private Long toLocationId;
+    private String fromLocationName;
+    private String toLocationName;
 }

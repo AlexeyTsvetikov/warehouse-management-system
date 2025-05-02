@@ -31,13 +31,11 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public RoleInfoResp createRole(RoleInfoReq req) {
-        if (roleRepository.findByRoleName(req.getRoleName()).isPresent()) {
+        if (roleRepository.findByName(req.getName()).isPresent()) {
             throw new CommonBackendException("Role with name already exists", HttpStatus.CONFLICT);
         }
 
-        Role role = new Role();
-        role.setRoleName(req.getRoleName());
-        role.setDescription(req.getDescription());
+        Role role = objectMapper.convertValue(req, Role.class);
         role.setIsActive(true);
 
         Role savedRole = roleRepository.save(role);
@@ -82,7 +80,7 @@ public class RoleServiceImpl implements RoleService {
         Role role = roleRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new CommonBackendException(errMsg, HttpStatus.NOT_FOUND));
 
-        role.setRoleName(req.getRoleName() != null ? req.getRoleName() : role.getRoleName());
+        role.setName(req.getName() != null ? req.getName() : role.getName());
         role.setDescription(req.getDescription() != null ? req.getDescription() : role.getDescription());
 
         Role updatedRole = roleRepository.save(role);

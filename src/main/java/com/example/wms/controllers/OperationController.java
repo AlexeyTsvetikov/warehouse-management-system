@@ -50,7 +50,7 @@ public class OperationController {
     public Page<OperationDetailInfoResp> getDetailsByOperation(@PathVariable Long operationId,
                                                                @RequestParam(defaultValue = "1") Integer page,
                                                                @RequestParam(defaultValue = "10") Integer perPage,
-                                                               @RequestParam(defaultValue = "brand") String sort,
+                                                               @RequestParam(defaultValue = "id") String sort,
                                                                @RequestParam(defaultValue = "ASC") Sort.Direction order) {
         return operationService.getDetailsByOperation(operationId, page, perPage, sort, order);
     }

@@ -17,7 +17,6 @@ import lombok.experimental.SuperBuilder;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OperationInfoReq {
     private OperationType operationType;
-    private Long orderId;
     private Long userId;
     private Long documentId;
 }

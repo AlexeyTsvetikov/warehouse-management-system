@@ -19,20 +19,20 @@ public class StockController {
         return stockService.getStockByProductAndLocation(productId, locationId);
     }
 
-    @GetMapping("/{productId}")
+    @GetMapping("/product/{productId}")
     public Page<StockInfoResp> getStockByProduct(@PathVariable Long productId,
                                                  @RequestParam(defaultValue = "1") Integer page,
                                                  @RequestParam(defaultValue = "10") Integer perPage,
-                                                 @RequestParam(defaultValue = "brand") String sort,
+                                                 @RequestParam(defaultValue = "status") String sort,
                                                  @RequestParam(defaultValue = "ASC") Sort.Direction order) {
         return stockService.getStockByProduct(productId, page, perPage, sort, order);
     }
 
-    @GetMapping("/{locationId}")
-    public Page<StockInfoResp> getDetailsByOperation(@PathVariable Long locationId,
+    @GetMapping("/location/{locationId}")
+    public Page<StockInfoResp> getStockByLocation(@PathVariable Long locationId,
                                                      @RequestParam(defaultValue = "1") Integer page,
                                                      @RequestParam(defaultValue = "10") Integer perPage,
-                                                     @RequestParam(defaultValue = "brand") String sort,
+                                                     @RequestParam(defaultValue = "status") String sort,
                                                      @RequestParam(defaultValue = "ASC") Sort.Direction order) {
         return stockService.getStockByLocation(locationId, page, perPage, sort, order);
     }
@@ -40,7 +40,7 @@ public class StockController {
     @GetMapping("/all")
     public Page<StockInfoResp> getAllStocks(@RequestParam(defaultValue = "1") Integer page,
                                             @RequestParam(defaultValue = "10") Integer perPage,
-                                            @RequestParam(defaultValue = "name") String sort,
+                                            @RequestParam(defaultValue = "status") String sort,
                                             @RequestParam(defaultValue = "ASC") Sort.Direction order) {
         return stockService.getAllStocks(page, perPage, sort, order);
     }

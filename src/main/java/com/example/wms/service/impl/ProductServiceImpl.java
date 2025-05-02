@@ -42,16 +42,10 @@ public class ProductServiceImpl implements ProductService {
             throw new CommonBackendException("Product  with sku already exists", HttpStatus.CONFLICT);
         }
 
-        Product product = new Product();
-        product.setSku(req.getSku());
-        product.setName(req.getName());
-        product.setDescription(req.getDescription());
-        product.setWeight(req.getWeight());
-        product.setDimensions(req.getDimensions());
-        product.setIsActive(true);
+        Product product = objectMapper.convertValue(req, Product.class);
 
         if (req.getCategoryName() != null) {
-            Category category = categoryRepository.findByName(req.getCategoryName())
+            Category category = categoryRepository.findByNameAndIsActiveTrue(req.getCategoryName())
                     .orElseThrow(() -> new CommonBackendException(
                             "Category with name : " + req.getCategoryName() + " not found", HttpStatus.NOT_FOUND));
             product.setCategory(category);
@@ -60,16 +54,20 @@ public class ProductServiceImpl implements ProductService {
         }
 
         if (req.getManufacturerName() != null) {
-            Manufacturer manufacturer = manufacturerRepository.findByName(req.getManufacturerName())
+            Manufacturer manufacturer = manufacturerRepository.findByNameAndIsActiveTrue(req.getManufacturerName())
                     .orElseThrow(() -> new CommonBackendException(
                             "Manufacturer with name : " + req.getManufacturerName() + " not found", HttpStatus.NOT_FOUND));
             product.setManufacturer(manufacturer);
         } else {
             throw new CommonBackendException("Manufacturer must be provided", HttpStatus.BAD_REQUEST);
         }
-
+        product.setIsActive(true);
         Product savedProduct = productRepository.save(product);
-        return objectMapper.convertValue(savedProduct, ProductInfoResp.class);
+
+        ProductInfoResp resp = objectMapper.convertValue(savedProduct, ProductInfoResp.class);
+        resp.setManufacturerName(savedProduct.getManufacturer().getName());
+        resp.setCategoryName(savedProduct.getCategory().getName());
+        return resp;
     }
 
     @Override
@@ -77,10 +75,13 @@ public class ProductServiceImpl implements ProductService {
     public ProductInfoResp getProduct(Long id) {
         final String errMsg = String.format("Product  with id: %s not found", id);
 
-        Product product = productRepository.findById(id)
+        Product product = productRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new CommonBackendException(errMsg, HttpStatus.NOT_FOUND));
 
-        return objectMapper.convertValue(product, ProductInfoResp.class);
+        ProductInfoResp resp = objectMapper.convertValue(product, ProductInfoResp.class);
+        resp.setManufacturerName(product.getManufacturer().getName());
+        resp.setCategoryName(product.getCategory().getName());
+        return resp;
     }
 
     @Override
@@ -93,8 +94,12 @@ public class ProductServiceImpl implements ProductService {
         products = productRepository.findAllByIsActiveTrue(pageRequest);
 
         List<ProductInfoResp> content = products.getContent().stream()
-                .map(product -> objectMapper.convertValue(product, ProductInfoResp.class))
-                .collect(Collectors.toList());
+                .map(product -> {
+                    ProductInfoResp resp = objectMapper.convertValue(product, ProductInfoResp.class);
+                    resp.setManufacturerName(product.getManufacturer().getName());
+                    resp.setCategoryName(product.getCategory().getName());
+                    return resp;
+                }).collect(Collectors.toList());
 
         return new PageImpl<>(content, pageRequest, products.getTotalElements());
     }
@@ -104,7 +109,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductInfoResp updateProduct(Long id, ProductInfoReq req) {
         final String errMsg = String.format("Product  with id: %s not found", id);
 
-        Product product = productRepository.findById(id)
+        Product product = productRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new CommonBackendException(errMsg, HttpStatus.NOT_FOUND));
 
         product.setSku(req.getSku() != null ? req.getSku() : product.getSku());
@@ -114,21 +119,24 @@ public class ProductServiceImpl implements ProductService {
         product.setDimensions(req.getDimensions() != null ? req.getDimensions() : product.getDimensions());
 
         if (req.getCategoryName() != null) {
-            Category category = categoryRepository.findByName(req.getCategoryName())
+            Category category = categoryRepository.findByNameAndIsActiveTrue(req.getCategoryName())
                     .orElseThrow(() -> new CommonBackendException(
                             "Category with name : " + req.getCategoryName() + " not found", HttpStatus.NOT_FOUND));
             product.setCategory(category);
         }
 
         if (req.getManufacturerName() != null) {
-            Manufacturer manufacturer = manufacturerRepository.findByName(req.getManufacturerName())
+            Manufacturer manufacturer = manufacturerRepository.findByNameAndIsActiveTrue(req.getManufacturerName())
                     .orElseThrow(() -> new CommonBackendException(
                             "Manufacturer with name : " + req.getManufacturerName() + " not found", HttpStatus.NOT_FOUND));
             product.setManufacturer(manufacturer);
         }
 
         Product updatedProduct = productRepository.save(product);
-        return objectMapper.convertValue(updatedProduct, ProductInfoResp.class);
+        ProductInfoResp resp = objectMapper.convertValue(updatedProduct, ProductInfoResp.class);
+        resp.setManufacturerName(updatedProduct.getManufacturer().getName());
+        resp.setCategoryName(updatedProduct.getCategory().getName());
+        return resp;
 
     }
 
@@ -137,7 +145,7 @@ public class ProductServiceImpl implements ProductService {
     public void deleteProduct(Long id) {
         final String errMsg = String.format("Product  with id: %s not found", id);
 
-        Product product = productRepository.findById(id)
+        Product product = productRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new CommonBackendException(errMsg, HttpStatus.NOT_FOUND));
         product.setIsActive(false);
         productRepository.save(product);

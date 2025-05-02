@@ -82,7 +82,8 @@ public class StockServiceImpl implements StockService {
                 log.info("Decreased stock for product {} at location {} by {}", product.getId(), location.getId(), quantity);
             }
         } else {
-            throw new CommonBackendException("Stock not found for the specified product and location", HttpStatus.NOT_FOUND);
+            final String errMsg = String.format("Stock not found for product with id: %s and location with id: %s", product.getId(),location.getId());
+            throw new CommonBackendException(errMsg, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -105,7 +106,7 @@ public class StockServiceImpl implements StockService {
         Page<Stock> stocks = stockRepository.findAllByStatus(StockStatus.AVAILABLE, pageRequest);
 
         List<StockInfoResp> content = stocks.getContent().stream()
-                .map(stock -> objectMapper.convertValue(stock, StockInfoResp.class))
+                .map((this::getStockInfoResp))
                 .collect(Collectors.toList());
 
         return new PageImpl<>(content, pageRequest, stocks.getTotalElements());
@@ -122,7 +123,7 @@ public class StockServiceImpl implements StockService {
         Stock stock = stockRepository.findByProductAndLocation(product, location)
                 .orElseThrow(() -> new CommonBackendException("Stock not found", HttpStatus.NOT_FOUND));
 
-        return objectMapper.convertValue(stock, StockInfoResp.class);
+        return getStockInfoResp(stock);
     }
 
     @Override
@@ -136,7 +137,7 @@ public class StockServiceImpl implements StockService {
         Page<Stock> stocks = stockRepository.findByProduct(product, pageRequest);
 
         List<StockInfoResp> content = stocks.getContent().stream()
-                .map(stock -> objectMapper.convertValue(stock, StockInfoResp.class))
+                .map(this::getStockInfoResp)
                 .collect(Collectors.toList());
 
         return new PageImpl<>(content, pageRequest, stocks.getTotalElements());
@@ -153,10 +154,17 @@ public class StockServiceImpl implements StockService {
         Page<Stock> stocks = stockRepository.findByLocation(location, pageRequest);
 
         List<StockInfoResp> content = stocks.getContent().stream()
-                .map(stock -> objectMapper.convertValue(stock, StockInfoResp.class))
+                .map((this::getStockInfoResp))
                 .collect(Collectors.toList());
 
         return new PageImpl<>(content, pageRequest, stocks.getTotalElements());
+    }
+
+    private StockInfoResp getStockInfoResp(Stock stock) {
+        StockInfoResp resp = objectMapper.convertValue(stock, StockInfoResp.class);
+        resp.setProductSku(stock.getProduct().getSku());
+        resp.setLocationName(stock.getLocation().getName());
+        return resp;
     }
 }
 
