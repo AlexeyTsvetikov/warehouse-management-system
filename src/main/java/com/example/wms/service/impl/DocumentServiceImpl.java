@@ -3,6 +3,7 @@ package com.example.wms.service.impl;
 
 import com.example.wms.exception.CommonBackendException;
 import com.example.wms.model.db.entity.Document;
+import com.example.wms.model.db.entity.Partner;
 import com.example.wms.model.db.repository.DocumentRepository;
 import com.example.wms.model.db.repository.PartnerRepository;
 import com.example.wms.model.dto.request.DocumentInfoReq;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,18 +40,22 @@ public class DocumentServiceImpl implements DocumentService {
             throw new CommonBackendException("Document with number already exists", HttpStatus.CONFLICT);
         }
 
-        final String errMsg = String.format("Partner with id: %s not found", req.getPartnerId());
-
-        if (!partnerRepository.existsByIdAndIsActiveTrue(req.getPartnerId())) {
-            throw new CommonBackendException(errMsg, HttpStatus.NOT_FOUND);
+        Document document = objectMapper.convertValue(req, Document.class);
+        if (req.getPartnerId() != null) {
+            Partner partner = partnerRepository.findByIdAndIsActiveTrue(req.getPartnerId())
+                    .orElseThrow(() -> new CommonBackendException(
+                            "Partner with id : " + req.getPartnerId() + " not found", HttpStatus.NOT_FOUND));
+            document.setPartner(partner);
+        } else {
+            throw new CommonBackendException("Partner must be provided", HttpStatus.BAD_REQUEST);
         }
 
-        Document document = objectMapper.convertValue(req, Document.class);
         document.setIsActive(true);
-
         Document savedDocument = documentRepository.save(document);
 
-        return objectMapper.convertValue(savedDocument, DocumentInfoResp.class);
+        DocumentInfoResp resp = objectMapper.convertValue(savedDocument, DocumentInfoResp.class);
+        resp.setPartnerName(savedDocument.getPartner().getName());
+        return resp;
     }
 
     @Override
@@ -60,19 +66,31 @@ public class DocumentServiceImpl implements DocumentService {
         Document document = documentRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new CommonBackendException(errMsg, HttpStatus.NOT_FOUND));
 
-        return objectMapper.convertValue(document, DocumentInfoResp.class);
+        DocumentInfoResp resp = objectMapper.convertValue(document, DocumentInfoResp.class);
+        resp.setPartnerName(document.getPartner().getName());
+        return resp;
     }
 
-    @Transactional(readOnly = true)
     @Override
-    public Page<DocumentInfoResp> getAllDocuments(Integer page, Integer perPage, String sort, Sort.Direction order) {
+    @Transactional(readOnly = true)
+    public Page<DocumentInfoResp> getAllDocuments(Integer page, Integer perPage, String sort, Sort.Direction order, String filter) {
 
         Pageable pageRequest = PaginationUtils.getPageRequest(page, perPage, sort, order);
 
-        Page<Document> documents = documentRepository.findAllByIsActiveTrue(pageRequest);
+        Page<Document> documents;
+
+        if (StringUtils.hasText(filter)) {
+            documents = documentRepository.findAllFiltered(pageRequest, filter);
+        } else {
+            documents = documentRepository.findAllByIsActiveTrue(pageRequest);
+        }
 
         List<DocumentInfoResp> content = documents.getContent().stream()
-                .map(document -> objectMapper.convertValue(document, DocumentInfoResp.class))
+                .map(document -> {
+                    DocumentInfoResp resp = objectMapper.convertValue(document, DocumentInfoResp.class);
+                    resp.setPartnerName(document.getPartner().getName());
+                    return resp;
+                })
                 .collect(Collectors.toList());
 
         return new PageImpl<>(content, pageRequest, documents.getTotalElements());
@@ -91,7 +109,9 @@ public class DocumentServiceImpl implements DocumentService {
         document.setNotes(req.getNotes() != null ? req.getNotes() : document.getNotes());
 
         Document updatedDocument = documentRepository.save(document);
-        return objectMapper.convertValue(updatedDocument, DocumentInfoResp.class);
+        DocumentInfoResp resp = objectMapper.convertValue(updatedDocument, DocumentInfoResp.class);
+        resp.setPartnerName(updatedDocument.getPartner().getName());
+        return resp;
     }
 
     @Override

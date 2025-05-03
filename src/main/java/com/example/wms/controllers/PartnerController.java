@@ -3,6 +3,7 @@ package com.example.wms.controllers;
 import com.example.wms.model.dto.request.PartnerInfoReq;
 import com.example.wms.model.dto.response.PartnerInfoResp;
 
+import com.example.wms.model.enums.PartnerType;
 import com.example.wms.service.PartnerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,8 +30,9 @@ public class PartnerController {
     public Page<PartnerInfoResp> getAllPartners(@RequestParam(defaultValue = "1") Integer page,
                                                 @RequestParam(defaultValue = "10") Integer perPage,
                                                 @RequestParam(defaultValue = "name") String sort,
-                                                @RequestParam(defaultValue = "ASC") Sort.Direction order) {
-        return partnerService.getAllPartners(page, perPage, sort, order);
+                                                @RequestParam(defaultValue = "ASC") Sort.Direction order,
+                                                @RequestParam(required = false) PartnerType filter) {
+        return partnerService.getAllPartners(page, perPage, sort, order, filter);
     }
 
     @PutMapping("/{id}")

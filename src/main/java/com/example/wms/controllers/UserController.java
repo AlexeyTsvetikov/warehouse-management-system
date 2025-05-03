@@ -28,8 +28,9 @@ public class UserController {
     public Page<UserInfoResp> getAllUsers(@RequestParam(defaultValue = "1") Integer page,
                                           @RequestParam(defaultValue = "10") Integer perPage,
                                           @RequestParam(defaultValue = "username") String sort,
-                                          @RequestParam(defaultValue = "ASC") Sort.Direction order) {
-        return userService.getAllUsers(page, perPage, sort, order);
+                                          @RequestParam(defaultValue = "ASC") Sort.Direction order,
+                                          @RequestParam(required = false) String filter) {
+        return userService.getAllUsers(page, perPage, sort, order, filter);
     }
 
     @PutMapping("/{id}")

@@ -59,9 +59,7 @@ public class RoleServiceImpl implements RoleService {
     public Page<RoleInfoResp> getAllRoles(Integer page, Integer perPage, String sort, Sort.Direction order) {
 
         Pageable pageRequest = PaginationUtils.getPageRequest(page, perPage, sort, order);
-        Page<Role> roles;
-
-        roles = roleRepository.findAllByIsActiveTrue(pageRequest);
+        Page<Role> roles = roleRepository.findAllByIsActiveTrue(pageRequest);
 
         List<RoleInfoResp> content = roles.getContent().stream()
                 .map(role -> objectMapper.convertValue(role, RoleInfoResp.class))
@@ -69,8 +67,6 @@ public class RoleServiceImpl implements RoleService {
 
         return new PageImpl<>(content, pageRequest, roles.getTotalElements());
     }
-
-    //Добавить получение всех пользователей по роли
 
     @Override
     @Transactional

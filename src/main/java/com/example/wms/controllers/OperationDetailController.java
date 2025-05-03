@@ -28,8 +28,9 @@ public class OperationDetailController {
     public Page<OperationDetailInfoResp> getAllOperationDetails(@RequestParam(defaultValue = "1") Integer page,
                                                                 @RequestParam(defaultValue = "10") Integer perPage,
                                                                 @RequestParam(defaultValue = "id") String sort,
-                                                                @RequestParam(defaultValue = "ASC") Sort.Direction order) {
-        return operationDetailService.getAllOperationDetails(page, perPage, sort, order);
+                                                                @RequestParam(defaultValue = "ASC") Sort.Direction order,
+                                                                @RequestParam(required = false) Long filter) {
+        return operationDetailService.getAllOperationDetails(page, perPage, sort, order, filter);
     }
 
     @PutMapping("/{id}")

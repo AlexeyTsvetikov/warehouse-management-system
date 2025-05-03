@@ -7,6 +7,7 @@ import com.example.wms.model.db.repository.LocationRepository;
 import com.example.wms.model.db.repository.WarehouseRepository;
 import com.example.wms.model.dto.request.LocationInfoReq;
 import com.example.wms.model.dto.response.LocationInfoResp;
+import com.example.wms.model.enums.LocationType;
 import com.example.wms.service.LocationService;
 import com.example.wms.utils.PaginationUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,8 +52,9 @@ public class LocationServiceImpl implements LocationService {
         }
         location.setIsActive(true);
         Location savedLocation = locationRepository.save(location);
-
-        return objectMapper.convertValue(savedLocation, LocationInfoResp.class);
+        LocationInfoResp resp = objectMapper.convertValue(savedLocation, LocationInfoResp.class);
+        resp.setWarehouseName(savedLocation.getWarehouse().getName());
+        return resp;
     }
 
     @Override
@@ -69,11 +72,17 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<LocationInfoResp> getAllLocations(Integer page, Integer perPage, String sort, Sort.Direction order) {
+    public Page<LocationInfoResp> getAllLocations(Integer page, Integer perPage, String sort, Sort.Direction order, LocationType filter) {
 
         Pageable pageRequest = PaginationUtils.getPageRequest(page, perPage, sort, order);
 
-        Page<Location> locations = locationRepository.findAllByIsActiveTrue(pageRequest);
+        Page<Location> locations;
+
+        if (filter != null && StringUtils.hasText(String.valueOf(filter))){
+            locations = locationRepository.findAllFiltered(filter, pageRequest);
+        } else {
+            locations = locationRepository.findAllByIsActiveTrue(pageRequest);
+        }
 
         List<LocationInfoResp> content = locations.getContent().stream()
                 .map(location -> {

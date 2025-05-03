@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.util.List;
 
 @Getter
 @Setter
@@ -23,5 +22,4 @@ public class OperationInfoResp {
     private OperationStatus operationStatus;
     private String username;
     private String documentNumber;
-    private List<OperationDetailInfoResp> operationDetails;
 }

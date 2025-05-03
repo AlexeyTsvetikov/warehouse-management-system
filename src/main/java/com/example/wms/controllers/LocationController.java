@@ -2,6 +2,7 @@ package com.example.wms.controllers;
 
 import com.example.wms.model.dto.request.LocationInfoReq;
 import com.example.wms.model.dto.response.LocationInfoResp;
+import com.example.wms.model.enums.LocationType;
 import com.example.wms.service.LocationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,10 +27,11 @@ public class LocationController {
 
     @GetMapping("/all")
     public Page<LocationInfoResp> getAllLocations(@RequestParam(defaultValue = "1") Integer page,
-                                                    @RequestParam(defaultValue = "10") Integer perPage,
-                                                    @RequestParam(defaultValue = "name") String sort,
-                                                    @RequestParam(defaultValue = "ASC") Sort.Direction order) {
-        return locationService.getAllLocations(page, perPage, sort, order);
+                                                  @RequestParam(defaultValue = "10") Integer perPage,
+                                                  @RequestParam(defaultValue = "name") String sort,
+                                                  @RequestParam(defaultValue = "ASC") Sort.Direction order,
+                                                  @RequestParam(required = false) LocationType filter) {
+        return locationService.getAllLocations(page, perPage, sort, order, filter);
     }
 
     @PutMapping("/{id}")

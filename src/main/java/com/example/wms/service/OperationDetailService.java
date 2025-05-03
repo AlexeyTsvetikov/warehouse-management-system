@@ -22,7 +22,7 @@ public interface OperationDetailService {
     @Transactional
     OperationDetailInfoResp updateOperationDetail(Long id, OperationDetailInfoReq req);
 
-    Page<OperationDetailInfoResp> getAllOperationDetails(Integer page, Integer perPage, String sort, Sort.Direction order);
+    Page<OperationDetailInfoResp> getAllOperationDetails(Integer page, Integer perPage, String sort, Sort.Direction order, Long filter);
 
     OperationDetailInfoResp getOperationDetailInfoResp(OperationDetail detail);
 }

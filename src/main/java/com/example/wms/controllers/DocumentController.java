@@ -26,10 +26,11 @@ public class DocumentController {
 
     @GetMapping("/all")
     public Page<DocumentInfoResp> getAllDocuments(@RequestParam(defaultValue = "1") Integer page,
-                                                    @RequestParam(defaultValue = "10") Integer perPage,
-                                                    @RequestParam(defaultValue = "number") String sort,
-                                                    @RequestParam(defaultValue = "ASC") Sort.Direction order) {
-        return documentService.getAllDocuments(page, perPage, sort, order);
+                                                  @RequestParam(defaultValue = "10") Integer perPage,
+                                                  @RequestParam(defaultValue = "number") String sort,
+                                                  @RequestParam(defaultValue = "ASC") Sort.Direction order,
+                                                  @RequestParam(required = false) String filter) {
+        return documentService.getAllDocuments(page, perPage, sort, order, filter);
     }
 
     @PutMapping("/{id}")

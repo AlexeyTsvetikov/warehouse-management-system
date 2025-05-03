@@ -1,8 +1,8 @@
 package com.example.wms.controllers;
 
 import com.example.wms.model.dto.request.OperationInfoReq;
-import com.example.wms.model.dto.response.OperationDetailInfoResp;
 import com.example.wms.model.dto.response.OperationInfoResp;
+import com.example.wms.model.enums.OperationType;
 import com.example.wms.service.OperationService;
 import lombok.RequiredArgsConstructor;
 
@@ -46,13 +46,13 @@ public class OperationController {
         return operationService.getOperation(id);
     }
 
-    @GetMapping("/{operationId}/details")
-    public Page<OperationDetailInfoResp> getDetailsByOperation(@PathVariable Long operationId,
-                                                               @RequestParam(defaultValue = "1") Integer page,
-                                                               @RequestParam(defaultValue = "10") Integer perPage,
-                                                               @RequestParam(defaultValue = "id") String sort,
-                                                               @RequestParam(defaultValue = "ASC") Sort.Direction order) {
-        return operationService.getDetailsByOperation(operationId, page, perPage, sort, order);
+    @GetMapping("/all")
+    public Page<OperationInfoResp> getAllOperations(@RequestParam(defaultValue = "1") Integer page,
+                                                          @RequestParam(defaultValue = "10") Integer perPage,
+                                                          @RequestParam(defaultValue = "id") String sort,
+                                                          @RequestParam(defaultValue = "ASC") Sort.Direction order,
+                                                          @RequestParam(required = false) OperationType filter) {
+        return operationService.getAllOperations(page, perPage, sort, order, filter);
     }
 
     @DeleteMapping("/{id}")

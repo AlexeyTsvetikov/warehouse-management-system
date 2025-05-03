@@ -19,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -71,12 +72,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<UserInfoResp> getAllUsers(Integer page, Integer perPage, String sort, Sort.Direction order) {
+    public Page<UserInfoResp> getAllUsers(Integer page, Integer perPage, String sort, Sort.Direction order, String filter) {
 
         Pageable pageRequest = PaginationUtils.getPageRequest(page, perPage, sort, order);
         Page<User> users;
-
-        users = userRepository.findAllByIsActiveTrue(pageRequest);
+        if (StringUtils.hasText(filter)) {
+            users = userRepository.findAllFiltered(pageRequest, filter);
+        } else {
+            users = userRepository.findAllByIsActiveTrue(pageRequest);
+        }
 
         List<UserInfoResp> content = users.getContent().stream()
                 .map(user -> {

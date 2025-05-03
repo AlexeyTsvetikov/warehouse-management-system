@@ -5,6 +5,7 @@ import com.example.wms.model.db.entity.Partner;
 import com.example.wms.model.db.repository.PartnerRepository;
 import com.example.wms.model.dto.request.PartnerInfoReq;
 import com.example.wms.model.dto.response.PartnerInfoResp;
+import com.example.wms.model.enums.PartnerType;
 import com.example.wms.service.PartnerService;
 import com.example.wms.utils.PaginationUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,12 +58,17 @@ public class PartnerServiceImpl implements PartnerService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PartnerInfoResp> getAllPartners(Integer page, Integer perPage, String sort, Sort.Direction order) {
+    public Page<PartnerInfoResp> getAllPartners(Integer page, Integer perPage, String sort, Sort.Direction order, PartnerType filter) {
 
         Pageable pageRequest = PaginationUtils.getPageRequest(page, perPage, sort, order);
         Page<Partner> partners;
 
-        partners = partnerRepository.findAllByIsActiveTrue(pageRequest);
+        if (filter != null && StringUtils.hasText(String.valueOf(filter))) {
+            partners = partnerRepository.findAllFiltered(filter, pageRequest);
+        } else {
+            partners = partnerRepository.findAllByIsActiveTrue(pageRequest);
+        }
+
 
         List<PartnerInfoResp> content = partners.getContent().stream()
                 .map(partner -> objectMapper.convertValue(partner, PartnerInfoResp.class))

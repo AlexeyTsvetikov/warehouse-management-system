@@ -21,6 +21,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -86,12 +87,16 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductInfoResp> getAllProducts(Integer page, Integer perPage, String sort, Sort.Direction order) {
+    public Page<ProductInfoResp> getAllProducts(Integer page, Integer perPage, String sort, Sort.Direction order, String filter) {
 
         Pageable pageRequest = PaginationUtils.getPageRequest(page, perPage, sort, order);
         Page<Product> products;
 
-        products = productRepository.findAllByIsActiveTrue(pageRequest);
+        if(StringUtils.hasText(filter)) {
+            products = productRepository.findAllFiltered(pageRequest, filter);
+        } else {
+            products = productRepository.findAllByIsActiveTrue(pageRequest);
+        }
 
         List<ProductInfoResp> content = products.getContent().stream()
                 .map(product -> {

@@ -19,29 +19,12 @@ public class StockController {
         return stockService.getStockByProductAndLocation(productId, locationId);
     }
 
-    @GetMapping("/product/{productId}")
-    public Page<StockInfoResp> getStockByProduct(@PathVariable Long productId,
-                                                 @RequestParam(defaultValue = "1") Integer page,
-                                                 @RequestParam(defaultValue = "10") Integer perPage,
-                                                 @RequestParam(defaultValue = "status") String sort,
-                                                 @RequestParam(defaultValue = "ASC") Sort.Direction order) {
-        return stockService.getStockByProduct(productId, page, perPage, sort, order);
-    }
-
-    @GetMapping("/location/{locationId}")
-    public Page<StockInfoResp> getStockByLocation(@PathVariable Long locationId,
-                                                     @RequestParam(defaultValue = "1") Integer page,
-                                                     @RequestParam(defaultValue = "10") Integer perPage,
-                                                     @RequestParam(defaultValue = "status") String sort,
-                                                     @RequestParam(defaultValue = "ASC") Sort.Direction order) {
-        return stockService.getStockByLocation(locationId, page, perPage, sort, order);
-    }
-
     @GetMapping("/all")
     public Page<StockInfoResp> getAllStocks(@RequestParam(defaultValue = "1") Integer page,
                                             @RequestParam(defaultValue = "10") Integer perPage,
                                             @RequestParam(defaultValue = "status") String sort,
-                                            @RequestParam(defaultValue = "ASC") Sort.Direction order) {
-        return stockService.getAllStocks(page, perPage, sort, order);
+                                            @RequestParam(defaultValue = "ASC") Sort.Direction order,
+                                            @RequestParam(required = false) String filter) {
+        return stockService.getAllStocks(page, perPage, sort, order, filter);
     }
 }

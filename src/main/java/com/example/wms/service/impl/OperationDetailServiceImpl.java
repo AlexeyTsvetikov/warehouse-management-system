@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -64,10 +65,16 @@ public class OperationDetailServiceImpl implements OperationDetailService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<OperationDetailInfoResp> getAllOperationDetails(Integer page, Integer perPage, String sort, Sort.Direction order) {
+    public Page<OperationDetailInfoResp> getAllOperationDetails(Integer page, Integer perPage, String sort, Sort.Direction order, Long filter) {
         Pageable pageRequest = PaginationUtils.getPageRequest(page, perPage, sort, order);
 
-        Page<OperationDetail> operationDetails = operationDetailRepository.findAll(pageRequest);
+        Page<OperationDetail> operationDetails;
+
+        if (filter != null && StringUtils.hasText(String.valueOf(filter))) {
+            operationDetails = operationDetailRepository.findByOperationId(filter, pageRequest);
+        } else {
+            operationDetails = operationDetailRepository.findAll(pageRequest);
+        }
 
         List<OperationDetailInfoResp> content = operationDetails.getContent().stream()
                 .map(this::getOperationDetailInfoResp).collect(Collectors.toList());

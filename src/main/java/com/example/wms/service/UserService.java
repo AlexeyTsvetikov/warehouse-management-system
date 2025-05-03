@@ -11,7 +11,7 @@ public interface UserService {
     UserInfoResp createUser(UserInfoReq req);
 
     @Transactional(readOnly = true)
-    Page<UserInfoResp> getAllUsers(Integer page, Integer perPage, String sort, Sort.Direction order);
+    Page<UserInfoResp> getAllUsers(Integer page, Integer perPage, String sort, Sort.Direction order, String filter);
 
     UserInfoResp updateUser(Long userId, UserInfoReq req);
 

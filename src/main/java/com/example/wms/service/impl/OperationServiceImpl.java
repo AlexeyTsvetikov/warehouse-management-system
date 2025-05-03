@@ -4,10 +4,9 @@ import com.example.wms.exception.CommonBackendException;
 import com.example.wms.model.db.entity.*;
 import com.example.wms.model.db.repository.*;
 import com.example.wms.model.dto.request.OperationInfoReq;
-import com.example.wms.model.dto.response.OperationDetailInfoResp;
 import com.example.wms.model.dto.response.OperationInfoResp;
 import com.example.wms.model.enums.OperationStatus;
-import com.example.wms.service.OperationDetailService;
+import com.example.wms.model.enums.OperationType;
 import com.example.wms.service.OperationService;
 import com.example.wms.service.StockService;
 import com.example.wms.utils.PaginationUtils;
@@ -21,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,8 +35,6 @@ public class OperationServiceImpl implements OperationService {
     private final DocumentRepository documentRepository;
     private final ObjectMapper objectMapper;
     private final StockService stockService;
-    private final OperationDetailService operationDetailService;
-    private final OperationDetailRepository operationDetailRepository;
 
     @Override
     @Transactional
@@ -53,7 +51,7 @@ public class OperationServiceImpl implements OperationService {
         operation.setOperationStatus(OperationStatus.CREATED);
         Operation savedOperation = operationRepository.save(operation);
 
-        return getOperationInfoResp(savedOperation, operation.getOperationDetails());
+        return getOperationInfoResp(savedOperation);
 
     }
 
@@ -89,7 +87,7 @@ public class OperationServiceImpl implements OperationService {
         List<OperationDetail> details = operation.getOperationDetails();
 
         if (details == null || details.isEmpty()) {
-            throw new CommonBackendException("Нет деталей для операции. Статус операции обновлен на CREATED.", HttpStatus.BAD_REQUEST);
+            throw new CommonBackendException("There are no details for the operation.", HttpStatus.BAD_REQUEST);
         }
 
         try {
@@ -104,7 +102,7 @@ public class OperationServiceImpl implements OperationService {
         } catch (CommonBackendException e) {
             throw new CommonBackendException("Error during receiving for operation ID: " + id + ": " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return getOperationInfoResp(operation, details);
+        return getOperationInfoResp(operation);
     }
 
     @Override
@@ -123,7 +121,7 @@ public class OperationServiceImpl implements OperationService {
         List<OperationDetail> details = operation.getOperationDetails();
 
         if (details == null || details.isEmpty()) {
-            throw new CommonBackendException("Нет деталей для операции. Статус операции обновлен на CREATED.", HttpStatus.BAD_REQUEST);
+            throw new CommonBackendException("There are no details for the operation.", HttpStatus.BAD_REQUEST);
         }
 
         try {
@@ -138,7 +136,7 @@ public class OperationServiceImpl implements OperationService {
         } catch (CommonBackendException e) {
             throw new CommonBackendException("Error during shipping for operation ID: " + id + ": " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return getOperationInfoResp(operation, details);
+        return getOperationInfoResp(operation);
     }
 
     @Override
@@ -158,7 +156,7 @@ public class OperationServiceImpl implements OperationService {
         List<OperationDetail> details = operation.getOperationDetails();
 
         if (details == null || details.isEmpty()) {
-            throw new CommonBackendException("Нет деталей для операции. Статус операции обновлен на CREATED.", HttpStatus.BAD_REQUEST);
+            throw new CommonBackendException("There are no details for the operation.", HttpStatus.BAD_REQUEST);
         }
 
         try {
@@ -176,7 +174,7 @@ public class OperationServiceImpl implements OperationService {
             throw new CommonBackendException("Error during stock transfer for operation ID: " + id + ": " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return getOperationInfoResp(operation, details);
+        return getOperationInfoResp(operation);
     }
 
     @Override
@@ -187,21 +185,27 @@ public class OperationServiceImpl implements OperationService {
         Operation operation = operationRepository.findById(id)
                 .orElseThrow(() -> new CommonBackendException(errMsg, HttpStatus.NOT_FOUND));
 
-        return getOperationInfoResp(operation, operation.getOperationDetails());
+        return getOperationInfoResp(operation);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<OperationDetailInfoResp> getDetailsByOperation(Long operationId, Integer page, Integer perPage, String sort, Sort.Direction order) {
+    public Page<OperationInfoResp> getAllOperations(Integer page, Integer perPage, String sort, Sort.Direction order, OperationType filter) {
         Pageable pageRequest = PaginationUtils.getPageRequest(page, perPage, sort, order);
-        Page<OperationDetail> operationDetails = operationDetailRepository.findByOperationId(operationId, pageRequest);
 
-        List<OperationDetailInfoResp> content = operationDetails.getContent().stream()
-                .map(operationDetailService::getOperationDetailInfoResp).collect(Collectors.toList());
+        Page<Operation> operations;
 
-        return new PageImpl<>(content, pageRequest, operationDetails.getTotalElements());
+        if (filter != null && StringUtils.hasText(String.valueOf(filter))) {
+            operations = operationRepository.findAllFiltered(filter, pageRequest);
+        } else {
+            operations = operationRepository.findAll(pageRequest);
+        }
+
+        List<OperationInfoResp> content = operations.getContent().stream()
+                .map(this::getOperationInfoResp).collect(Collectors.toList());
+
+        return new PageImpl<>(content, pageRequest, operations.getTotalElements());
     }
-
 
     @Override
     @Transactional
@@ -223,15 +227,11 @@ public class OperationServiceImpl implements OperationService {
         operationRepository.save(operation);
     }
 
-    private OperationInfoResp getOperationInfoResp(Operation operation, List<OperationDetail> details) {
-        List<OperationDetailInfoResp> detailsResp = details.stream()
-                .map(operationDetailService::getOperationDetailInfoResp)
-                .collect(Collectors.toList());
+    private OperationInfoResp getOperationInfoResp(Operation operation) {
 
         OperationInfoResp resp = objectMapper.convertValue(operation, OperationInfoResp.class);
         resp.setDocumentNumber(operation.getDocument().getNumber());
         resp.setUsername(operation.getUser().getUsername());
-        resp.setOperationDetails(detailsResp);
         return resp;
     }
 

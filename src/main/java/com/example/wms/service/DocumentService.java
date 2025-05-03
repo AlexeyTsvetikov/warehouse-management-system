@@ -15,7 +15,7 @@ public interface DocumentService {
     DocumentInfoResp getDocument(Long id);
 
     @Transactional(readOnly = true)
-    Page<DocumentInfoResp> getAllDocuments(Integer page, Integer perPage, String sort, Sort.Direction order);
+    Page<DocumentInfoResp> getAllDocuments(Integer page, Integer perPage, String sort, Sort.Direction order, String filter);
 
     @Transactional
     DocumentInfoResp updateDocument(Long id, DocumentInfoReq req);

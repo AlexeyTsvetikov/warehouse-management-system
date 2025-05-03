@@ -13,7 +13,7 @@ public interface ProductService {
     ProductInfoResp getProduct(Long id);
 
     @Transactional(readOnly = true)
-    Page<ProductInfoResp> getAllProducts(Integer page, Integer perPage, String sort, Sort.Direction order);
+    Page<ProductInfoResp> getAllProducts(Integer page, Integer perPage, String sort, Sort.Direction order, String filter);
 
     ProductInfoResp updateProduct(Long id, ProductInfoReq req);
 

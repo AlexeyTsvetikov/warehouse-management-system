@@ -21,14 +21,10 @@ public interface StockService {
     void transferStock(Product product, Integer quantity, Location fromLocation, Location toLocation);
 
     @Transactional(readOnly = true)
-    Page<StockInfoResp> getAllStocks(Integer page, Integer perPage, String sort, Sort.Direction order);
-
-    @Transactional(readOnly = true)
     StockInfoResp getStockByProductAndLocation(Long productId, Long locationId);
 
     @Transactional(readOnly = true)
-    Page<StockInfoResp> getStockByProduct(Long productId, Integer page, Integer perPage, String sort, Sort.Direction order);
+    Page<StockInfoResp> getAllStocks(Integer page, Integer perPage, String sort, Sort.Direction order, String filter);
 
-    @Transactional(readOnly = true)
-    Page<StockInfoResp> getStockByLocation(Long locationId, Integer page, Integer perPage, String sort, Sort.Direction order);
+
 }
