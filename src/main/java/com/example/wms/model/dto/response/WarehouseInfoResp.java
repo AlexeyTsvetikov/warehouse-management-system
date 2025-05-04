@@ -1,6 +1,7 @@
 package com.example.wms.model.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,8 +17,15 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WarehouseInfoResp {
+    @Schema(description = "id")
     private Long id;
+
+    @Schema(description = "Наименование")
     private String name;
+
+    @Schema(description = "Адрес")
     private String address;
+
+    @Schema(description = "Вместимость")
     private BigDecimal capacity;
 }

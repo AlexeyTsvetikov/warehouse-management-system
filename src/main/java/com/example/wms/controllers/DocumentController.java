@@ -3,6 +3,9 @@ package com.example.wms.controllers;
 import com.example.wms.model.dto.request.DocumentInfoReq;
 import com.example.wms.model.dto.response.DocumentInfoResp;
 import com.example.wms.service.DocumentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -11,20 +14,24 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/documents")
 @RequiredArgsConstructor
+@Tag(name = "Документы")
 public class DocumentController {
     private final DocumentService documentService;
 
     @PostMapping
-    public DocumentInfoResp createDocument(@RequestBody DocumentInfoReq req) {
+    @Operation(summary = "Создать документ")
+    public DocumentInfoResp createDocument(@RequestBody @Valid DocumentInfoReq req) {
         return documentService.createDocument(req);
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Получить документ по id")
     public DocumentInfoResp getDocument(@PathVariable Long id) {
         return documentService.getDocument(id);
     }
 
     @GetMapping("/all")
+    @Operation(summary = "Получить список документов")
     public Page<DocumentInfoResp> getAllDocuments(@RequestParam(defaultValue = "1") Integer page,
                                                   @RequestParam(defaultValue = "10") Integer perPage,
                                                   @RequestParam(defaultValue = "number") String sort,
@@ -34,11 +41,13 @@ public class DocumentController {
     }
 
     @PutMapping("/{id}")
-    public DocumentInfoResp updateDocument(@PathVariable Long id, @RequestBody DocumentInfoReq req) {
+    @Operation(summary = "Обновить документ по id")
+    public DocumentInfoResp updateDocument(@PathVariable Long id, @RequestBody @Valid DocumentInfoReq req) {
         return documentService.updateDocument(id, req);
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Удалить документ по id")
     public void deleteDocument(@PathVariable Long id) {
         documentService.deleteDocument(id);
     }

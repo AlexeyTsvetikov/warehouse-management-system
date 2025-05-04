@@ -3,6 +3,9 @@ package com.example.wms.controllers;
 import com.example.wms.model.dto.request.CategoryInfoReq;
 import com.example.wms.model.dto.response.CategoryInfoResp;
 import com.example.wms.service.CategoryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -11,33 +14,39 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/categories")
 @RequiredArgsConstructor
+@Tag(name = "Категории товаров")
 public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public CategoryInfoResp createCategory(@RequestBody CategoryInfoReq req) {
+    @Operation(summary = "Создать категорию товаров")
+    public CategoryInfoResp createCategory(@RequestBody @Valid CategoryInfoReq req) {
         return categoryService.createCategory(req);
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Получить категорию товаров по id")
     public CategoryInfoResp getCategory(@PathVariable Long id) {
         return categoryService.getCategory(id);
     }
 
     @GetMapping("/all")
+    @Operation(summary = "Получить список категорий товаров")
     public Page<CategoryInfoResp> getAllCategories(@RequestParam(defaultValue = "1") Integer page,
-                                                    @RequestParam(defaultValue = "10") Integer perPage,
-                                                    @RequestParam(defaultValue = "name") String sort,
-                                                    @RequestParam(defaultValue = "ASC") Sort.Direction order) {
+                                                   @RequestParam(defaultValue = "10") Integer perPage,
+                                                   @RequestParam(defaultValue = "name") String sort,
+                                                   @RequestParam(defaultValue = "ASC") Sort.Direction order) {
         return categoryService.getAllCategories(page, perPage, sort, order);
     }
 
     @PutMapping("/{id}")
-    public CategoryInfoResp updateCategory(@PathVariable Long id, @RequestBody CategoryInfoReq req) {
+    @Operation(summary = "Обновить категорию товаров по id")
+    public CategoryInfoResp updateCategory(@PathVariable Long id, @RequestBody @Valid CategoryInfoReq req) {
         return categoryService.updateCategory(id, req);
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Удалить категорию товаров по id")
     public void deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
     }
