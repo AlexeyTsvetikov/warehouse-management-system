@@ -328,7 +328,7 @@ class UserServiceImplTest {
 
         CommonBackendException ex = assertThrows(CommonBackendException.class, () ->
                 userService.updateUser(user.getId(), req));
-        assertEquals(String.format("User  with id: %s not found", req.getRoleName()), ex.getMessage());
+        assertEquals(String.format("Role with name: %s not found", req.getRoleName()), ex.getMessage());
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
     }
 
