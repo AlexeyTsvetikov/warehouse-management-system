@@ -40,10 +40,15 @@ public class LocationServiceImpl implements LocationService {
             throw new CommonBackendException("Location  with name already exists", HttpStatus.CONFLICT);
         }
 
-        Location location = objectMapper.convertValue(req, Location.class);
+        Location location = new Location();
+        location.setName(req.getName());
+        location.setLocationType(req.getLocationType());
+        location.setMaxCapacity(req.getMaxCapacity());
+        location.setDimensions(req.getDimensions());
+        location.setDescription(req.getDescription());
 
         if (req.getWarehouseId() != null) {
-            Warehouse warehouse = warehouseRepository.findById(req.getWarehouseId())
+            Warehouse warehouse = warehouseRepository.findByIdAndIsActiveTrue(req.getWarehouseId())
                     .orElseThrow(() -> new CommonBackendException(
                             "Warehouse with id: " + req.getWarehouseId() + " not found", HttpStatus.NOT_FOUND));
             location.setWarehouse(warehouse);
@@ -103,7 +108,7 @@ public class LocationServiceImpl implements LocationService {
                 .orElseThrow(() -> new CommonBackendException(errMsg, HttpStatus.NOT_FOUND));
 
         if (req.getWarehouseId() != null) {
-            Warehouse warehouse = warehouseRepository.findById(req.getWarehouseId())
+            Warehouse warehouse = warehouseRepository.findByIdAndIsActiveTrue(req.getWarehouseId())
                     .orElseThrow(() -> new CommonBackendException(
                             "Warehouse with id : " + req.getWarehouseId() + " not found", HttpStatus.NOT_FOUND));
             location.setWarehouse(warehouse);

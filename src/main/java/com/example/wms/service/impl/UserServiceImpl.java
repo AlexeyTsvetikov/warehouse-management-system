@@ -40,7 +40,13 @@ public class UserServiceImpl implements UserService {
             throw new CommonBackendException("User  with username already exists", HttpStatus.CONFLICT);
         }
 
-        User user = objectMapper.convertValue(req, User.class);
+        User user = new User();
+        user.setUsername(req.getUsername());
+        user.setPasswordHash(req.getPasswordHash());
+        user.setFirstName(req.getFirstName());
+        user.setLastName(req.getLastName());
+        user.setMiddleName(req.getMiddleName());
+        user.setIsActive(true);
 
         if (req.getRoleName() != null) {
             Role role = roleRepository.findByNameAndIsActiveTrue(req.getRoleName())
@@ -50,7 +56,7 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new CommonBackendException("Role must be provided", HttpStatus.BAD_REQUEST);
         }
-        user.setIsActive(true);
+
         User savedUser = userRepository.save(user);
         UserInfoResp resp = objectMapper.convertValue(savedUser, UserInfoResp.class);
         resp.setRoleName(savedUser.getRole().getName());

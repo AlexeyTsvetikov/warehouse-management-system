@@ -40,7 +40,11 @@ public class DocumentServiceImpl implements DocumentService {
             throw new CommonBackendException("Document with number already exists", HttpStatus.CONFLICT);
         }
 
-        Document document = objectMapper.convertValue(req, Document.class);
+        Document document = new Document();
+        document.setNumber(req.getNumber());
+        document.setDate(req.getDate());
+        document.setNotes(req.getNotes());
+
         if (req.getPartnerId() != null) {
             Partner partner = partnerRepository.findByIdAndIsActiveTrue(req.getPartnerId())
                     .orElseThrow(() -> new CommonBackendException(
