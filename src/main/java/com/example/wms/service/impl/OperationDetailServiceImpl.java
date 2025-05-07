@@ -52,7 +52,8 @@ public class OperationDetailServiceImpl implements OperationDetailService {
             throw new CommonBackendException("Cannot add details to an operation that is not in 'CREATED' status", HttpStatus.FORBIDDEN);
         }
 
-        OperationDetail operationDetail = objectMapper.convertValue(req, OperationDetail.class);
+        OperationDetail operationDetail = new OperationDetail();
+        operationDetail.setQuantity(req.getQuantity());
         operationDetail.setProduct(product);
         operationDetail.setFromLocation(fromLocation);
         operationDetail.setToLocation(toLocation);
@@ -119,7 +120,7 @@ public class OperationDetailServiceImpl implements OperationDetailService {
 
         if (req.getFromLocationName() != null) {
             Location fromLocation = locationRepository.findByNameAndIsActiveTrue(req.getFromLocationName())
-                    .orElseThrow(() -> new CommonBackendException("Departure location not found", HttpStatus.NOT_FOUND));
+                    .orElseThrow(() -> new CommonBackendException("From location not found", HttpStatus.NOT_FOUND));
             operationDetail.setFromLocation(fromLocation);
         }
 

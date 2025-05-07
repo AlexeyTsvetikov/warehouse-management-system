@@ -1,5 +1,6 @@
 package com.example.wms.model.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -13,9 +14,10 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OperationDetailInfoResp {
-    @Schema(description = "id детали опреации")
+    @Schema(description = "id детали операции")
     private Long id;
 
     @Schema(description = "id операции")

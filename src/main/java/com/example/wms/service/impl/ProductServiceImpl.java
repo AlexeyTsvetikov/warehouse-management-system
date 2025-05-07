@@ -43,7 +43,13 @@ public class ProductServiceImpl implements ProductService {
             throw new CommonBackendException("Product  with sku already exists", HttpStatus.CONFLICT);
         }
 
-        Product product = objectMapper.convertValue(req, Product.class);
+        Product product = new Product();
+        product.setSku(req.getSku());
+        product.setName(req.getName());
+        product.setDescription(req.getDescription());
+        product.setWeight(req.getWeight());
+        product.setDimensions(req.getDimensions());
+        product.setIsActive(true);
 
         if (req.getCategoryName() != null) {
             Category category = categoryRepository.findByNameAndIsActiveTrue(req.getCategoryName())
@@ -62,7 +68,7 @@ public class ProductServiceImpl implements ProductService {
         } else {
             throw new CommonBackendException("Manufacturer must be provided", HttpStatus.BAD_REQUEST);
         }
-        product.setIsActive(true);
+
         Product savedProduct = productRepository.save(product);
 
         ProductInfoResp resp = objectMapper.convertValue(savedProduct, ProductInfoResp.class);
