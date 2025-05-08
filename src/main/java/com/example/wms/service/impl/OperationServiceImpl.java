@@ -45,7 +45,8 @@ public class OperationServiceImpl implements OperationService {
         Document document = documentRepository.findByIdAndIsActiveTrue(req.getDocumentId())
                 .orElseThrow(() -> new CommonBackendException("Document not found", HttpStatus.NOT_FOUND));
 
-        Operation operation = objectMapper.convertValue(req, Operation.class);
+        Operation operation = new Operation();
+        operation.setOperationType(req.getOperationType());
         operation.setUser(user);
         operation.setDocument(document);
         operation.setOperationStatus(OperationStatus.CREATED);
@@ -180,7 +181,7 @@ public class OperationServiceImpl implements OperationService {
     @Override
     @Transactional(readOnly = true)
     public OperationInfoResp getOperation(Long id) {
-        final String errMsg = String.format("Operation  with id: %s not found", id);
+        final String errMsg = String.format("Operation with id: %s not found", id);
 
         Operation operation = operationRepository.findById(id)
                 .orElseThrow(() -> new CommonBackendException(errMsg, HttpStatus.NOT_FOUND));
@@ -210,7 +211,7 @@ public class OperationServiceImpl implements OperationService {
     @Override
     @Transactional
     public void cancelOperation(Long id) {
-        final String errMsg = String.format("Operation  with id: %s not found", id);
+        final String errMsg = String.format("Operation with id: %s not found", id);
 
         Operation operation = operationRepository.findById(id)
                 .orElseThrow(() -> new CommonBackendException(errMsg, HttpStatus.NOT_FOUND));
