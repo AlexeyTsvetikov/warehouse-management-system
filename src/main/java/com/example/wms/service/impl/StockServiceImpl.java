@@ -91,6 +91,10 @@ public class StockServiceImpl implements StockService {
     @Override
     @Transactional
     public void transferStock(Product product, Integer quantity, Location fromLocation, Location toLocation) {
+        if (product == null || quantity == null || fromLocation == null || toLocation == null) {
+            throw new CommonBackendException("Invalid input parameters for transferStock", HttpStatus.BAD_REQUEST);
+        }
+
         if (fromLocation.equals(toLocation)) {
             throw new CommonBackendException("Source and destination locations cannot be the same", HttpStatus.BAD_REQUEST);
         }
