@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,42 +23,49 @@ public class OperationController {
 
     @PostMapping
     @Operation(summary = "Создать операцию")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STOREKEEPER') or hasRole('PICKER') or hasRole('RECEIVER')")
     public OperationInfoResp createOperation(@RequestBody @Valid OperationInfoReq req) {
         return operationService.createOperation(req);
     }
 
     @PostMapping("/start/{id}")
     @Operation(summary = "Подготовить операцию к выполнению по id")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STOREKEEPER') or hasRole('PICKER') or hasRole('RECEIVER')")
     public void startOperation(@PathVariable Long id) {
         operationService.startOperation(id);
     }
 
     @PostMapping("/receiving/{id}")
     @Operation(summary = "Провести операцию приемки товаров по id")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STOREKEEPER') or hasRole('PICKER') or hasRole('RECEIVER')")
     public OperationInfoResp receivingOperation(@PathVariable Long id) {
         return operationService.receivingOperation(id);
     }
 
     @PostMapping("/shipping/{id}")
     @Operation(summary = "Провести операцию отгрузки товаров по id")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STOREKEEPER') or hasRole('PICKER') or hasRole('RECEIVER')")
     public OperationInfoResp shippingOperation(@PathVariable Long id) {
         return operationService.shippingOperation(id);
     }
 
     @PostMapping("/transfer/{id}")
     @Operation(summary = "Провести операцию перемещения товаров по id")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STOREKEEPER') or hasRole('PICKER') or hasRole('RECEIVER')")
     public OperationInfoResp transferOperation(@PathVariable Long id) {
         return operationService.transferOperation(id);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Получить операцию по id")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STOREKEEPER') or hasRole('PICKER') or hasRole('RECEIVER')")
     public OperationInfoResp getOperation(@PathVariable Long id) {
         return operationService.getOperation(id);
     }
 
     @GetMapping("/all")
     @Operation(summary = "Получить список операций")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STOREKEEPER') or hasRole('PICKER') or hasRole('RECEIVER')")
     public Page<OperationInfoResp> getAllOperations(@RequestParam(defaultValue = "1") Integer page,
                                                           @RequestParam(defaultValue = "10") Integer perPage,
                                                           @RequestParam(defaultValue = "id") String sort,
@@ -68,6 +76,7 @@ public class OperationController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Отменить операцию по id")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STOREKEEPER') or hasRole('PICKER') or hasRole('RECEIVER')")
     public void cancelOperation(@PathVariable Long id) {
         operationService.cancelOperation(id);
     }

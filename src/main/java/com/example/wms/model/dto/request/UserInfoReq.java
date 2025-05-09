@@ -22,7 +22,7 @@ public class UserInfoReq {
 
     @NotEmpty
     @Schema(description = "Хеш пароля")
-    private String passwordHash;
+    private String password;
 
     @NotEmpty
     @Schema(description = "Имя")

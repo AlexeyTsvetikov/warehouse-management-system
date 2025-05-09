@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,18 +21,21 @@ public class RoleController {
 
     @PostMapping
     @Operation(summary = "Создать роль")
+    @PreAuthorize("hasRole('ADMIN')")
     public RoleInfoResp createRole(@RequestBody @Valid RoleInfoReq req) {
         return roleService.createRole(req);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Получить роль по id")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public RoleInfoResp getRole(@PathVariable Long id) {
         return roleService.getRole(id);
     }
 
     @GetMapping("/all")
     @Operation(summary = "Получить список ролей")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public Page<RoleInfoResp> getAllRoles(@RequestParam(defaultValue = "1") Integer page,
                                           @RequestParam(defaultValue = "10") Integer perPage,
                                           @RequestParam(defaultValue = "name") String sort,
@@ -41,12 +45,14 @@ public class RoleController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Обновить роль по id")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public RoleInfoResp updateRole(@PathVariable Long id, @RequestBody @Valid RoleInfoReq req) {
         return roleService.updateRole(id, req);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Удалить роль по id")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteRole(@PathVariable Long id) {
         roleService.deleteRole(id);
     }

@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,18 +23,21 @@ public class PartnerController {
 
     @PostMapping
     @Operation(summary = "Создать партнера")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STOREKEEPER')")
     public PartnerInfoResp createPartner(@RequestBody @Valid PartnerInfoReq req) {
         return partnerService.createPartner(req);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Получить партнера по id")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STOREKEEPER') or hasRole('PICKER') or hasRole('RECEIVER')")
     public PartnerInfoResp getPartner(@PathVariable Long id) {
         return partnerService.getPartner(id);
     }
 
     @GetMapping("/all")
     @Operation(summary = "Получить список партнеров")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STOREKEEPER') or hasRole('PICKER') or hasRole('RECEIVER')")
     public Page<PartnerInfoResp> getAllPartners(@RequestParam(defaultValue = "1") Integer page,
                                                 @RequestParam(defaultValue = "10") Integer perPage,
                                                 @RequestParam(defaultValue = "name") String sort,
@@ -44,12 +48,14 @@ public class PartnerController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Обновить партнера по id")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public PartnerInfoResp updatePartner(@PathVariable Long id, @RequestBody @Valid PartnerInfoReq req) {
         return partnerService.updatePartner(id, req);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Удалить партнера по id")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public void deleteProduct(@PathVariable Long id) {
         partnerService.deletePartner(id);
     }

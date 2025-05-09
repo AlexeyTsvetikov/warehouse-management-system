@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,18 +21,21 @@ public class UserController {
 
     @PostMapping
     @Operation(summary = "Создать пользователя")
+    @PreAuthorize("hasRole('ADMIN')")
     public UserInfoResp createUser(@RequestBody @Valid UserInfoReq req) {
         return userService.createUser(req);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Получить пользователя по id")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public UserInfoResp getUser(@PathVariable Long id) {
         return userService.getUser(id);
     }
 
     @GetMapping("/all")
     @Operation(summary = "Получить список пользователей")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public Page<UserInfoResp> getAllUsers(@RequestParam(defaultValue = "1") Integer page,
                                           @RequestParam(defaultValue = "10") Integer perPage,
                                           @RequestParam(defaultValue = "username") String sort,
@@ -42,12 +46,14 @@ public class UserController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Обновить пользователя по id")
+    @PreAuthorize("hasRole('ADMIN')")
     public UserInfoResp updateUser(@PathVariable Long id, @RequestBody @Valid UserInfoReq req) {
         return userService.updateUser(id, req);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Удалить пользователя по id")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
     }

@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -32,6 +33,7 @@ public class UserServiceImpl implements UserService {
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -42,7 +44,7 @@ public class UserServiceImpl implements UserService {
 
         User user = new User();
         user.setUsername(req.getUsername());
-        user.setPasswordHash(req.getPasswordHash());
+        user.setPasswordHash(passwordEncoder.encode(req.getPassword()));
         user.setFirstName(req.getFirstName());
         user.setLastName(req.getLastName());
         user.setMiddleName(req.getMiddleName());
@@ -107,7 +109,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new CommonBackendException(errUserMsg, HttpStatus.NOT_FOUND));
 
         user.setUsername(req.getUsername() != null ? req.getUsername() : user.getUsername());
-        user.setPasswordHash(req.getPasswordHash() != null ? req.getPasswordHash() : user.getPasswordHash());
+        user.setPasswordHash(req.getPassword() != null ? req.getPassword() : user.getPasswordHash());
         user.setFirstName(req.getFirstName() != null ? req.getFirstName() : user.getFirstName());
         user.setLastName(req.getLastName() != null ? req.getLastName() : user.getLastName());
         user.setMiddleName(req.getMiddleName() != null ? req.getMiddleName() : user.getMiddleName());

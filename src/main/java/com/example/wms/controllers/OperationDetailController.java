@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,18 +21,21 @@ public class OperationDetailController {
 
     @PostMapping
     @Operation(summary = "Создать детали операции")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STOREKEEPER') or hasRole('PICKER') or hasRole('RECEIVER')")
     public OperationDetailInfoResp createOperationDetail(@RequestBody @Valid OperationDetailInfoReq req) {
         return operationDetailService.createOperationDetail(req);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Получить детали операции по id")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STOREKEEPER') or hasRole('PICKER') or hasRole('RECEIVER')")
     public OperationDetailInfoResp getOperationDetail(@PathVariable Long id) {
         return operationDetailService.getDetail(id);
     }
 
     @GetMapping("/all")
     @Operation(summary = "Получить список деталей операций")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STOREKEEPER') or hasRole('PICKER') or hasRole('RECEIVER')")
     public Page<OperationDetailInfoResp> getAllOperationDetails(@RequestParam(defaultValue = "1") Integer page,
                                                                 @RequestParam(defaultValue = "10") Integer perPage,
                                                                 @RequestParam(defaultValue = "id") String sort,
@@ -42,12 +46,14 @@ public class OperationDetailController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Обновить детали операции по id")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STOREKEEPER') or hasRole('PICKER') or hasRole('RECEIVER')")
     public OperationDetailInfoResp updateOperationDetail(@PathVariable Long id, @RequestBody @Valid OperationDetailInfoReq req) {
         return operationDetailService.updateOperationDetail(id, req);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Удалить детали операции по id")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STOREKEEPER') or hasRole('PICKER') or hasRole('RECEIVER')")
     public void deleteOperationDetail(@PathVariable Long id) {
         operationDetailService.deleteOperationDetail(id);
     }

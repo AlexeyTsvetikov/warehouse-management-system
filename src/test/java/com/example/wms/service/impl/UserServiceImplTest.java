@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +42,9 @@ class UserServiceImplTest {
     private RoleRepository roleRepository;
 
     @Spy
+    private PasswordEncoder passwordEncoder;
+
+    @Spy
     private ObjectMapper objectMapper;
 
     @Test
@@ -51,7 +55,7 @@ class UserServiceImplTest {
 
         UserInfoReq req = new UserInfoReq();
         req.setUsername("TestUsername");
-        req.setPasswordHash("TestPasswordHash");
+        req.setPassword("TestPasswordHash");
         req.setFirstName("TestFirstName");
         req.setLastName("TestLastName");
         req.setMiddleName("TestMiddleName");
@@ -59,7 +63,7 @@ class UserServiceImplTest {
 
         User user = new User();
         user.setUsername(req.getUsername());
-        user.setPasswordHash(req.getPasswordHash());
+        user.setPasswordHash(req.getPassword());
         user.setFirstName(req.getFirstName());
         user.setLastName(req.getLastName());
         user.setMiddleName(req.getMiddleName());
@@ -223,7 +227,7 @@ class UserServiceImplTest {
         UserInfoReq req = new UserInfoReq();
         req.setRoleName(role2.getName());
         req.setUsername("NewUsername");
-        req.setPasswordHash("NewPasswordHash");
+        req.setPassword("NewPasswordHash");
         req.setFirstName("NewFirstName");
         req.setLastName("NewLastName");
         req.setMiddleName("NewMiddleName");
@@ -272,7 +276,7 @@ class UserServiceImplTest {
         UserInfoReq req = new UserInfoReq();
         req.setRoleName(null);
         req.setUsername(null);
-        req.setPasswordHash(null);
+        req.setPassword(null);
         req.setFirstName(null);
         req.setLastName(null);
         req.setMiddleName(null);
@@ -318,7 +322,7 @@ class UserServiceImplTest {
         UserInfoReq req = new UserInfoReq();
         req.setRoleName("RoleNotFound");
         req.setUsername(null);
-        req.setPasswordHash(null);
+        req.setPassword(null);
         req.setFirstName(null);
         req.setLastName(null);
         req.setMiddleName(null);
