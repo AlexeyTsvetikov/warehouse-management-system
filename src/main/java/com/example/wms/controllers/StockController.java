@@ -35,4 +35,19 @@ public class StockController {
                                             @RequestParam(required = false) String filter) {
         return stockService.getAllStocks(page, perPage, sort, order, filter);
     }
+
+    @PostMapping("/inventory/{stockId}/{actualQuantity}")
+    @Operation(summary = "Провести инвентаризацию запаса по id")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STOREKEEPER')")
+    public void stockInventory(@PathVariable Long stockId, @PathVariable Integer actualQuantity) {
+        stockService.stockInventory(stockId, actualQuantity);
+    }
+
+    @PutMapping("/update/{stockId}/quantity")
+    @Operation(summary = "Обновить количество запаса по id")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public StockInfoResp updateStockQuantity(@PathVariable Long stockId, @RequestParam Integer quantity) {
+        return stockService.updateQuantity(stockId, quantity);
+    }
+
 }

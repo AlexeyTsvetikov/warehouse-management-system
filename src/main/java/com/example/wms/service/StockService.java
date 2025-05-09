@@ -20,6 +20,12 @@ public interface StockService {
     @Transactional
     void transferStock(Product product, Integer quantity, Location fromLocation, Location toLocation);
 
+    @Transactional
+    void stockInventory(Long stockId, Integer actualQuantity);
+
+    @Transactional
+    StockInfoResp updateQuantity(Long stockId, Integer quantity);
+
     @Transactional(readOnly = true)
     StockInfoResp getStockByProductAndLocation(Long productId, Long locationId);
 

@@ -2,6 +2,7 @@ package com.example.wms.model.db.entity;
 
 import com.example.wms.model.enums.StockStatus;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -9,6 +10,8 @@ import lombok.Setter;
 import org.hibernate.annotations.*;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -45,5 +48,8 @@ public class Stock {
     @JsonBackReference(value = "product-stock")
     private Product product;
 
+    @OneToMany(mappedBy = "stock", fetch = FetchType.LAZY)
+    @JsonManagedReference(value = "stock-inventory")
+    private List<Inventory> inventories = new ArrayList<>();
 
 }

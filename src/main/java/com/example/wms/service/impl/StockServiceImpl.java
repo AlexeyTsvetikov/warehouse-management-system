@@ -30,6 +30,7 @@ public class StockServiceImpl implements StockService {
     private final StockRepository stockRepository;
     private final ProductRepository productRepository;
     private final LocationRepository locationRepository;
+    private final InventoryRepository inventoryRepository;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -102,6 +103,42 @@ public class StockServiceImpl implements StockService {
         decreaseStock(product, fromLocation, quantity);
         increaseStock(product, toLocation, quantity);
     }
+
+    @Override
+    @Transactional
+    public void stockInventory(Long stockId, Integer actualQuantity) {
+        Stock stock = stockRepository.findByIdAndStatus(stockId, StockStatus.AVAILABLE)
+                .orElseThrow(() -> new CommonBackendException("Stock not found", HttpStatus.NOT_FOUND));
+
+        if (!stock.getQuantity().equals(actualQuantity)) {
+            stock.setStatus(StockStatus.UNAVAILABLE);
+            stockRepository.save(stock);
+            log.info("Сток для продукта {} в локации {} переведен в статус UNAVAILABLE до проведения корректировки.",
+                    stock.getProduct().getId(), stock.getLocation().getId());
+        } else {
+            log.info("Количество товара соответствует: {} == {}.", stock.getQuantity(), actualQuantity);
+        }
+
+        Inventory inventory = new Inventory();
+        inventory.setStock(stock);
+        inventory.setActualQuantity(actualQuantity);
+
+        inventoryRepository.save(inventory);
+    }
+
+    @Override
+    @Transactional
+    public StockInfoResp updateQuantity(Long stockId, Integer quantity) {
+        Stock stock = stockRepository.findByIdAndStatus(stockId, StockStatus.UNAVAILABLE)
+                .orElseThrow(() -> new CommonBackendException("Stock not found", HttpStatus.NOT_FOUND));
+
+        stock.setQuantity(quantity);
+        stock.setStatus(StockStatus.AVAILABLE);
+
+        Stock saved = stockRepository.save(stock);
+        return getStockInfoResp(saved);
+    }
+
 
     @Override
     @Transactional(readOnly = true)
