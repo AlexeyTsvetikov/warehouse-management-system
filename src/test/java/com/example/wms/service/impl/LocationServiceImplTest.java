@@ -6,7 +6,6 @@ import com.example.wms.model.db.entity.Warehouse;
 import com.example.wms.model.db.repository.LocationRepository;
 import com.example.wms.model.db.repository.WarehouseRepository;
 import com.example.wms.model.dto.request.LocationInfoReq;
-import com.example.wms.model.dto.response.DocumentInfoResp;
 import com.example.wms.model.dto.response.LocationInfoResp;
 import com.example.wms.model.enums.LocationType;
 import com.example.wms.utils.PaginationUtils;

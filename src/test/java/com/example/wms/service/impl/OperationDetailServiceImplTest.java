@@ -117,8 +117,8 @@ class OperationDetailServiceImplTest {
 
         when(productRepository.findBySkuAndIsActiveTrue(req.getSku())).thenReturn(Optional.empty());
 
-        CommonBackendException exception = assertThrows(CommonBackendException.class, () -> {
-            operationDetailService.createOperationDetail(req);});
+        CommonBackendException exception = assertThrows(CommonBackendException.class, () ->
+                operationDetailService.createOperationDetail(req));
 
         assertEquals("Product not found", exception.getMessage());
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
@@ -141,8 +141,8 @@ class OperationDetailServiceImplTest {
         when(productRepository.findBySkuAndIsActiveTrue(req.getSku())).thenReturn(Optional.of(product));
         when(locationRepository.findByNameAndIsActiveTrue(req.getFromLocationName())).thenReturn(Optional.empty());
 
-        CommonBackendException exception = assertThrows(CommonBackendException.class, () -> {
-            operationDetailService.createOperationDetail(req);});
+        CommonBackendException exception = assertThrows(CommonBackendException.class, () ->
+                operationDetailService.createOperationDetail(req));
 
         assertEquals("Departure location not found", exception.getMessage());
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
@@ -172,8 +172,8 @@ class OperationDetailServiceImplTest {
         when(locationRepository.findByNameAndIsActiveTrue(req.getFromLocationName())).thenReturn(Optional.of(fromLocation));
         when(locationRepository.findByNameAndIsActiveTrue(req.getToLocationName())).thenReturn(Optional.empty());
 
-        CommonBackendException exception = assertThrows(CommonBackendException.class, () -> {
-            operationDetailService.createOperationDetail(req);});
+        CommonBackendException exception = assertThrows(CommonBackendException.class, () ->
+                operationDetailService.createOperationDetail(req));
         assertEquals("Destination location not found", exception.getMessage());
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
     }
@@ -207,8 +207,8 @@ class OperationDetailServiceImplTest {
         when(locationRepository.findByNameAndIsActiveTrue(req.getToLocationName())).thenReturn(Optional.of(toLocation));
         when(operationRepository.findById(req.getOperationId())).thenReturn(Optional.empty());
 
-        CommonBackendException exception = assertThrows(CommonBackendException.class, () -> {
-            operationDetailService.createOperationDetail(req);});
+        CommonBackendException exception = assertThrows(CommonBackendException.class, () ->
+                operationDetailService.createOperationDetail(req));
         assertEquals("Operation not found", exception.getMessage());
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
     }
@@ -246,8 +246,7 @@ class OperationDetailServiceImplTest {
         when(locationRepository.findByNameAndIsActiveTrue(req.getToLocationName())).thenReturn(Optional.of(toLocation));
         when(operationRepository.findById(req.getOperationId())).thenReturn(Optional.of(operation));
 
-        CommonBackendException exception = assertThrows(CommonBackendException.class, () -> {
-            operationDetailService.createOperationDetail(req);});
+        CommonBackendException exception = assertThrows(CommonBackendException.class, () -> operationDetailService.createOperationDetail(req));
 
         assertEquals("Cannot add details to an operation that is not in 'CREATED' status", exception.getMessage());
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
@@ -382,8 +381,8 @@ class OperationDetailServiceImplTest {
 
         when(operationDetailRepository.findById(detailId)).thenReturn(Optional.empty());
 
-        CommonBackendException exception = assertThrows(CommonBackendException.class, () -> {
-            operationDetailService.getDetail(detailId);});
+        CommonBackendException exception = assertThrows(CommonBackendException.class, () ->
+                operationDetailService.getDetail(detailId));
 
         assertEquals("Operation detail not found", exception.getMessage());
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
@@ -441,8 +440,8 @@ class OperationDetailServiceImplTest {
 
         when(operationDetailRepository.findById(detailId)).thenReturn(Optional.empty());
 
-        CommonBackendException exception = assertThrows(CommonBackendException.class, () -> {
-            operationDetailService.updateOperationDetail(detailId, req);});
+        CommonBackendException exception = assertThrows(CommonBackendException.class, () ->
+                operationDetailService.updateOperationDetail(detailId, req));
         assertEquals("OperationDetail with id: 1 not found", exception.getMessage());
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
     }
@@ -461,9 +460,8 @@ class OperationDetailServiceImplTest {
 
         when(operationDetailRepository.findById(detailId)).thenReturn(Optional.of(existingDetail));
 
-        CommonBackendException exception = assertThrows(CommonBackendException.class, () -> {
-            operationDetailService.updateOperationDetail(detailId, req);
-        });
+        CommonBackendException exception = assertThrows(CommonBackendException.class, () ->
+                operationDetailService.updateOperationDetail(detailId, req));
         assertEquals("Cannot update details to an operation that is not in 'CREATED' status", exception.getMessage());
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
     }
@@ -485,8 +483,8 @@ class OperationDetailServiceImplTest {
         when(operationDetailRepository.findById(detailId)).thenReturn(Optional.of(existingDetail));
         when(productRepository.findBySkuAndIsActiveTrue(req.getSku())).thenReturn(Optional.empty());
 
-        CommonBackendException exception = assertThrows(CommonBackendException.class, () -> {
-            operationDetailService.updateOperationDetail(detailId, req);});
+        CommonBackendException exception = assertThrows(CommonBackendException.class, () ->
+                operationDetailService.updateOperationDetail(detailId, req));
         assertEquals("Product not found", exception.getMessage());
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
     }
@@ -509,8 +507,8 @@ class OperationDetailServiceImplTest {
 
         when(locationRepository.findByNameAndIsActiveTrue("Location A")).thenReturn(Optional.empty());
 
-        CommonBackendException exception = assertThrows(CommonBackendException.class, () -> {
-            operationDetailService.updateOperationDetail(detailId, req);});
+        CommonBackendException exception = assertThrows(CommonBackendException.class, () ->
+                operationDetailService.updateOperationDetail(detailId, req));
         assertEquals("From location not found", exception.getMessage());
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
     }
@@ -532,8 +530,8 @@ class OperationDetailServiceImplTest {
         when(operationDetailRepository.findById(detailId)).thenReturn(Optional.of(existingDetail));
         when(locationRepository.findByNameAndIsActiveTrue("Location B")).thenReturn(Optional.empty());
 
-        CommonBackendException exception = assertThrows(CommonBackendException.class, () -> {
-            operationDetailService.updateOperationDetail(detailId, req);});
+        CommonBackendException exception = assertThrows(CommonBackendException.class, () ->
+                operationDetailService.updateOperationDetail(detailId, req));
         assertEquals("Destination location not found", exception.getMessage());
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
     }
@@ -567,8 +565,8 @@ class OperationDetailServiceImplTest {
 
         when(operationDetailRepository.findById(detailId)).thenReturn(Optional.of(operationDetail));
 
-        CommonBackendException exception = assertThrows(CommonBackendException.class, () -> {
-            operationDetailService.deleteOperationDetail(detailId);});
+        CommonBackendException exception = assertThrows(CommonBackendException.class, () ->
+                operationDetailService.deleteOperationDetail(detailId));
 
         assertEquals("Cannot delete details from an operation that is not in 'CREATED' status", exception.getMessage());
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
@@ -579,8 +577,8 @@ class OperationDetailServiceImplTest {
         Long detailId = 1L;
         when(operationDetailRepository.findById(detailId)).thenReturn(Optional.empty());
 
-        CommonBackendException exception = assertThrows(CommonBackendException.class, () -> {
-            operationDetailService.deleteOperationDetail(detailId);});
+        CommonBackendException exception = assertThrows(CommonBackendException.class, () ->
+                operationDetailService.deleteOperationDetail(detailId));
 
         assertEquals("Operation detail not found", exception.getMessage());
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
