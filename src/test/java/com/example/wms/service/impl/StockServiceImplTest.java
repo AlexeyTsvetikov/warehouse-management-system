@@ -1,9 +1,11 @@
 package com.example.wms.service.impl;
 
 import com.example.wms.exception.CommonBackendException;
+import com.example.wms.model.db.entity.Inventory;
 import com.example.wms.model.db.entity.Location;
 import com.example.wms.model.db.entity.Product;
 import com.example.wms.model.db.entity.Stock;
+import com.example.wms.model.db.repository.InventoryRepository;
 import com.example.wms.model.db.repository.LocationRepository;
 import com.example.wms.model.db.repository.ProductRepository;
 import com.example.wms.model.db.repository.StockRepository;
@@ -45,6 +47,9 @@ class StockServiceImplTest {
 
     @Mock
     private LocationRepository locationRepository;
+
+    @Mock
+    private InventoryRepository inventoryRepository;
 
     @Spy
     private ObjectMapper objectMapper;
@@ -519,5 +524,114 @@ class StockServiceImplTest {
         assertEquals(stockInfoResp, result.getContent().get(0));
         assertEquals(1, result.getTotalElements());
         verify(stockRepository).findAll(pageable);
+    }
+
+    @Test
+    void stockInventoryStockNotFound() {
+        Long stockId = 1L;
+        Integer actualQuantity = 5;
+
+        when(stockRepository.findByIdAndStatus(stockId, StockStatus.AVAILABLE)).thenReturn(Optional.empty());
+
+        CommonBackendException exception = assertThrows(CommonBackendException.class, () ->
+                stockService.stockInventory(stockId, actualQuantity));
+        assertEquals("Stock not found", exception.getMessage());
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+    }
+
+    @Test
+    void stockInventoryQuantityMismatch() {
+        Product product = new Product();
+        product.setId(1L);
+
+        Location location = new Location();
+        location.setId(1L);
+        Integer actualQuantity = 5;
+
+        Stock stock = new Stock();
+        stock.setId(1L);
+        stock.setProduct(product);
+        stock.setLocation(location);
+        stock.setQuantity(3);
+        stock.setStatus(StockStatus.AVAILABLE);
+
+        when(stockRepository.findByIdAndStatus(stock.getId(), StockStatus.AVAILABLE)).thenReturn(Optional.of(stock));
+
+        stockService.stockInventory(stock.getId(), actualQuantity);
+
+        assertEquals(StockStatus.UNAVAILABLE, stock.getStatus());
+        verify(stockRepository).save(stock);
+        verify(inventoryRepository).save(any(Inventory.class));
+    }
+
+    @Test
+    void stockInventory_QuantityMatches_DoesNotUpdateStockStatus() {
+        Integer actualQuantity = 5;
+
+        Stock stock = new Stock();
+        stock.setId(1L);
+        stock.setQuantity(actualQuantity);
+        stock.setStatus(StockStatus.AVAILABLE);
+
+        when(stockRepository.findByIdAndStatus(stock.getId(), StockStatus.AVAILABLE)).thenReturn(Optional.of(stock));
+
+        stockService.stockInventory(stock.getId(), actualQuantity);
+
+        assertEquals(StockStatus.AVAILABLE, stock.getStatus());
+        verify(stockRepository, never()).save(stock);
+        verify(inventoryRepository).save(any(Inventory.class));
+    }
+
+    @Test
+    void updateQuantityStockNotFound() {
+        Long stockId = 1L;
+        Integer quantity = 10;
+
+        when(stockRepository.findByIdAndStatus(stockId, StockStatus.UNAVAILABLE)).thenReturn(Optional.empty());
+
+        CommonBackendException exception = assertThrows(CommonBackendException.class, () ->
+                stockService.updateQuantity(stockId, quantity));
+        assertEquals("Stock not found", exception.getMessage());
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+    }
+
+    @Test
+    void updateQuantitySuccess() {
+        Integer quantity = 10;
+
+        Product product = new Product();
+        product.setId(1L);
+
+        Location location = new Location();
+        location.setId(1L);
+
+        Stock stock = new Stock();
+        stock.setId(1L);
+        stock.setQuantity(5);
+        stock.setLocation(location);
+        stock.setProduct(product);
+        stock.setStatus(StockStatus.UNAVAILABLE);
+
+        when(stockRepository.findByIdAndStatus(stock.getId(), StockStatus.UNAVAILABLE)).thenReturn(Optional.of(stock));
+
+        Stock savedStock = new Stock();
+        savedStock.setId(stock.getId());
+        savedStock.setQuantity(quantity);
+        savedStock.setProduct(stock.getProduct());
+        savedStock.setLocation(stock.getLocation());
+        savedStock.setStatus(StockStatus.AVAILABLE);
+
+        when(stockRepository.save(stock)).thenReturn(savedStock);
+
+        StockInfoResp stockInfoResp = new StockInfoResp();
+        when(objectMapper.convertValue(savedStock, StockInfoResp.class)).thenReturn(stockInfoResp);
+
+        StockInfoResp result = stockService.updateQuantity(stock.getId(), quantity);
+
+        assertEquals(savedStock.getLocation().getName(), result.getLocationName());
+        assertEquals(savedStock.getProduct().getSku(), result.getProductSku());
+        assertEquals(quantity, savedStock.getQuantity());
+        assertEquals(StockStatus.AVAILABLE, savedStock.getStatus());
+        verify(stockRepository).save(stock);
     }
 }

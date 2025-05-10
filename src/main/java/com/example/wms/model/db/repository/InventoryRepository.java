@@ -9,7 +9,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
-    @Query("select i from Inventory i where i.stock.id = :stockId")
-    Page<Inventory> findAllFiltered(@Param("stockId")Long stockId, Pageable pageRequest);
+    @Query("select i from Inventory i where i.stock.id = :filter")
+    Page<Inventory> findAllFiltered(@Param("filter")Long filter, Pageable pageRequest);
 
 }
+

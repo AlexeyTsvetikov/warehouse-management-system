@@ -44,14 +44,14 @@ public class InventorServiceImpl implements InventoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<InventorInfoResp> getAllInventories(Integer page, Integer perPage, String sort, Sort.Direction order, Long stockId) {
+    public Page<InventorInfoResp> getAllInventories(Integer page, Integer perPage, String sort, Sort.Direction order, Long filter) {
 
         Pageable pageRequest = PaginationUtils.getPageRequest(page, perPage, sort, order);
 
         Page<Inventory> inventories;
 
-        if (stockId != null) {
-            inventories = inventoryRepository.findAllFiltered(stockId, pageRequest);
+        if (filter != null) {
+            inventories = inventoryRepository.findAllFiltered(filter, pageRequest);
         } else {
             inventories = inventoryRepository.findAll(pageRequest);
         }
